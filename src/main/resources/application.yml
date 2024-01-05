@@ -1,0 +1,61 @@
+app:
+  exec-init-script: ${INIT:false}
+  dev-mode: ${DEV_MODE:false}
+  name: smart-fermentation-tank-api
+  server-name: ${SERVER_NAME:localhost}
+  api-root-path: /api
+  logdir: /tmp/log/smart-fermentation-tank
+  jwt-key: ${JWT_KEY:69df8029ee03442e9ec3387515defed0}
+  jwt-expire-min: ${JWT_EXPIRE_MIN:43200}
+  log-server:
+    send-enable: ${LOG_SERVER_SEND_ENABLE:false}
+    host: ${LOG_SERVER_HOST:13.56.233.208}
+    port: ${LOG_SERVER_PORT:12201}
+    
+server:
+  port: 8080
+  http2:
+    enabled: true
+  compression:
+    enabled: true
+  error:
+    include-stacktrace: always
+  # https://tomcat.apache.org/tomcat-9.0-doc/config/valve.html#Access_Log_Valve
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: ${app.name}
+      pattern: '%h [%I] "%r" %s %B %{begin:yyyy-MM-dd HH:mm:ss.SSS}t %{end:yyyy-MM-dd HH:mm:ss.SSS}t %D %F "%{Referer}i" "%{User-Agent}i"'
+
+springdoc:
+  api-docs:
+    enabled: ${app.dev-mode}
+    path: /docs
+  swagger-ui:
+    enabled: ${app.dev-mode}
+    path: /api/docs
+    operationsSorter: method
+
+spring:
+  data:
+    mongodb:
+      host: ${DB_HOST:localhost}
+      port: ${DB_PORT:27017}
+      username: ${DB_USER:walnutek}
+      password: ${DB_PWD:1qaz@WSX}
+      database: ${DB_NAME:smart-fermentation-tank}
+      auto-index-creation: true
+
+  servlet:
+    multipart:
+      max-request-size: 20MB
+      max-file-size: 10MB
+
+  jackson:
+    date-format: yyyy/MM/dd
+    time-zone: ${TZ:Asia/Taipei}
+
+logging:
+  level:
+    com.walnutek.fermentationtank: debug
+    org.springframework.data.mongodb.core.MongoTemplate: debug

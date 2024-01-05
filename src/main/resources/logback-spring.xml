@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <timestamp key="logback.now" datePattern="yyyyMMdd'_'HHmm"/>
+    <springProperty scope="local" name="logback.jobname" source="spring.batch.job.names" defaultValue="all"/>
+    <springProperty scope="local" name="logback.appname" source="app.name" defaultValue="ansforce"/>
+    <springProperty scope="local" name="logback.logdir" source="app.logdir" defaultValue="/aplog/ansforce"/>
+	<springProperty scope="local" name="serverName" source="app.server-name" defaultValue="localhost"/>
+    <springProperty scope="local" name="logServerSendEnable" source="app.log-server.send-enable" defaultValue="false"/>
+    <springProperty scope="local" name="logServerHost" source="app.log-server.host" defaultValue=""/>
+    <springProperty scope="local" name="logServerPort" source="app.log-server.port" defaultValue=""/>
+    <property name="logback.logfile" value="${logback.appname}.${logback.now}"/>
+
+    <!-- SpringToolSuite Console Output格式 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Level(不分大小寫): TRACE, DEBUG, INFO, WARN, ERROR, ALL, OFF -->
+    <appender name="fileLog" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <!--日誌名稱，如果沒有File 屬性，那麼只會使用FileNamePattern的檔路徑規則。
+            如果同時有<File>和<FileNamePattern>，那麼當天日誌是<File>，明天會自動把今天 的日誌改名為今天的日期。
+            即<File> 的日誌都是當天的。
+        -->
+        <file>${logback.logdir}/${logback.logfile}.info.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d [${HOSTNAME:- }] %5level ${PID:- } [%15.15t] %-40.40logger{39} %line : %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="fileErrorLog" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <file>${logback.logdir}/${logback.logfile}.error.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d [${HOSTNAME:- }] %5level ${PID:- } [%15.15t] %-40.40logger{39} %line : %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="sqlLog" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <!--日誌名稱，如果沒有File 屬性，那麼只會使用FileNamePattern的檔路徑規則。
+            如果同時有<File>和<FileNamePattern>，那麼當天日誌是<File>，明天會自動把今天 的日誌改名為今天的日期。
+            即<File> 的日誌都是當天的。
+        -->
+        <file>${logback.logdir}/${logback.logfile}.sql.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d [${HOSTNAME:- }] %5level ${PID:- } [%15.15t] %-40.40logger{39} %line : %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="gelf" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>${logServerHost}</graylogHost>
+        <graylogPort>${logServerPort}</graylogPort>
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+            <includeCallerData>true</includeCallerData>
+            <includeRootCauseData>true</includeRootCauseData>
+            <includeLevelName>true</includeLevelName>
+            <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%m%nopex</pattern>
+            </shortPatternLayout>
+            <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%m%n</pattern>
+            </fullPatternLayout>
+            <staticField>server-name:${serverName}</staticField>
+            <staticField>app-name:${logback.appname}</staticField>
+            <staticField>os-name:${os.name}</staticField>
+            <staticField>os-version:${os.version}</staticField>
+        </encoder>
+    </appender>
+
+    <appender name="async-gelf" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="gelf" />
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="console"/>
+        <appender-ref ref="fileLog" />
+        <appender-ref ref="fileErrorLog" />
+        <appender-ref ref="sqlLog" />
+        <if condition='property("logServerSendEnable").equals("true")'>
+          <then>
+            <appender-ref ref="async-gelf"/>
+          </then>
+        </if>
+    </root>
+</configuration>

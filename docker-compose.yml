@@ -1,0 +1,76 @@
+version: '3.9'
+name: smart-fermentation-tank-compose
+
+x-logging: &default-logging
+  options:
+    max-size: "200k"
+    max-file: "1"
+    
+services:
+  ap:
+    image: smart-fermentation-tank-app:latest
+    profiles:
+      - deploy
+    restart: always
+    logging: *default-logging
+    environment:
+      DEV_MODE: "${DEV_MODE:-false}"
+      EXPOSE_PROTOCOL: "${EXPOSE_PROTOCOL:-http}"
+      EXPOSE_HOST: "${EXPOSE_HOST:-localhost:8080}"
+      DB_HOST: "${DB_HOST:-db}"
+      DB_PORT: "${DB_PORT:-27017}"
+      DB_NAME: "${DB_NAME:-smart-fermentation-tank}"
+      FS_HOST: "${FS_HOST:-file-server}"
+      FS_PORT: "${FS_PORT:-9000}"
+      FS_USER: "${FS_USER:-walnutek}"
+      FS_PWD: "${FS_PWD:-1qaz@WSX}"
+      LOG_SERVER_SEND_ENABLE: "${LOG_SERVER_SEND_ENABLE:-false}"
+      SERVER_NAME: "${SERVER_NAME:-localhost}"
+    ports:
+      - "${EXPOSE_AP_PORT:-}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: "bitnami/mongodb:7.0"
+    profiles:
+      - deploy
+      - dev
+    user: root
+    restart: always
+    logging: *default-logging
+    environment:
+      MONGODB_PORT_NUMBER: "${DB_PORT:-27017}"
+      MONGODB_DATABASE: "${DB_NAME:-smart-fermentation-tank}"
+      MONGODB_USERNAME: "${DB_USER:-walnutek}"
+      MONGODB_PASSWORD: "${DB_PWD:-1qaz@WSX}"
+      MONGODB_ROOT_PASSWORD: "${DB_ROOT_PWD:-admin}"
+    volumes:
+      - "${DB_DATA_PATH}:/bitnami/mongodb"
+    # only for dev server use
+    ports:
+      - "${EXPOSE_DB_PORT:-}:${DB_PORT:-27017}"
+    healthcheck:
+      test: mongosh -u root -p ${DB_ROOT_PWD:-admin} --port ${DB_PORT:-27017} --eval 'db.runCommand("ping").ok' --quiet
+      interval: 20s
+      retries: 3
+      start_period: 30s
+  db-tool:
+    image: "mongo-express:1.0"
+    profiles:
+      - deploy
+      - dev
+    restart: always
+    logging: *default-logging
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: "${DB_USER:-walnutek}"
+      ME_CONFIG_BASICAUTH_PASSWORD: "${DB_PWD:-1qaz@WSX}"
+      ME_CONFIG_MONGODB_SERVER: "db"
+      ME_CONFIG_MONGODB_PORT: "${DB_PORT:-27017}"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "root"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${DB_ROOT_PWD:-admin}"
+    ports:
+      - "${EXPOSE_DB_TOOL_PORT:-}:8081"
+    depends_on:
+      db:
+        condition: service_healthy
