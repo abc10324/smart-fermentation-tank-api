@@ -42,22 +42,10 @@ public class UserVO extends BaseColumns {
     @Schema(title = "Email")
     private String email;
 
-//    @JsonIgnore
-    private Laboratory[] labArr = new Laboratory[]{};
+    @JsonIgnore
+    private List<Laboratory> labList = List.of();
 
-    public List<String> getLabIdList() {
-        List<String> resultList = new ArrayList<>();
-
-        if(Objects.nonNull(labArr)) {
-            System.out.println(labArr);
-            Stream.of(labArr).forEach(System.out::println);
-//            Stream.of(labArr).map(Laboratory::getId).forEach(resultList::add);
-        }
-
-        return resultList;
-    }
-
-    @Schema(title = "所屬實驗室ID", accessMode = Schema.AccessMode.WRITE_ONLY)
+    @Schema(title = "所屬實驗室ID")
     private List<String> labIdList = List.of();
 
     @Schema(title = "所屬實驗室名稱", accessMode = Schema.AccessMode.READ_ONLY)
@@ -78,6 +66,12 @@ public class UserVO extends BaseColumns {
         return Optional.ofNullable(status)
                 .map(User.Status::getName)
                 .orElse("未定義");
+    }
+
+    public List<String> getLabIdList() {
+        return Objects.nonNull(labList) ?
+                labList.stream().map(Laboratory::getId).toList() :
+                labIdList;
     }
 
     public static UserVO of(User data) {
@@ -129,7 +123,8 @@ public class UserVO extends BaseColumns {
                 .outerJoin(Laboratory.class)
                 .on(User::getLabList, Laboratory::getId)
                 .mappingTo(UserVO.class)
-                .mapping(UserVO::getLabArr)
+                .asArrayField()
+                .mapping(UserVO::getLabList)
                 .build();
     }
     
