@@ -10,6 +10,8 @@ import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,7 +61,8 @@ public class User extends BaseColumns {
 	/**
 	 * 所屬實驗室
 	 */
-	private List<ObjectId> labList = List.of();
+	@Field(targetType = FieldType.OBJECT_ID)
+	private List<String> labList = List.of();
 
 	/**
 	 * 帳號狀態
@@ -76,7 +79,7 @@ public class User extends BaseColumns {
 	 */
 	@JsonFormat(pattern = "yyyy/MM/dd HH:mm")
 	private LocalDateTime lastLoginTime;
-	
+
 	@Getter
 	public enum Status {
 		DELETED( "刪除"),

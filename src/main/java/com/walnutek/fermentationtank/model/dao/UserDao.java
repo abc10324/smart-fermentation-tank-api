@@ -31,7 +31,7 @@ public class UserDao extends BaseDao<User> {
 
     private QueryCondition getQueryCondition(Map<String,Object> paramMap) {
         var criteriaList = Stream.of(
-//                where(User::getRole).ne(User.Role.SUPER_ADMIN),
+                where(User::getRole).ne(User.Role.SUPER_ADMIN),
                 where(hasText(paramMap.get("keyword")), UserVO::getAccount).like(paramMap.get("keyword"))
                         .or(where(UserVO::getName).like(paramMap.get("keyword")))
                         .or(where(UserVO::getEmail).like(paramMap.get("keyword")))

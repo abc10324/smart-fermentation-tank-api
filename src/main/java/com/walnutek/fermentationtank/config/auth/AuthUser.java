@@ -20,7 +20,7 @@ public class AuthUser {
 
 	private String email;
 
-	private List<String> labIdList = List.of();
+	private List<String> labList = List.of();
 
 	public static AuthUser of(Claims claims) {
 		AuthUser user = new AuthUser();
@@ -40,7 +40,7 @@ public class AuthUser {
 		vo.setRole(data.getRole());
 		vo.setName(data.getName());
 		vo.setEmail(data.getEmail());
-		vo.setLabIdList(data.getLabList().stream().map(ObjectId::toHexString).toList());
+		vo.setLabList(data.getLabList());
 
 		return vo;
 	}

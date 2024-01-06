@@ -11,6 +11,7 @@ import com.walnutek.fermentationtank.config.auth.HasRole;
 import com.walnutek.fermentationtank.config.auth.JwtService;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
+import com.walnutek.fermentationtank.model.dao.UserDao;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.UserService;
 import com.walnutek.fermentationtank.model.service.Utils;
@@ -45,7 +46,7 @@ public class UserController {
 
     @Autowired
     private JwtService jwtService;
-    
+
     @Operation(summary = "取得使用者清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
     @Parameter(name = "keyword", schema = @Schema(implementation = String.class), description = "帳號|使用者名稱")
@@ -87,7 +88,14 @@ public class UserController {
 											   @PathVariable String account){
 		return AccountExistResponse.of(userService.isAccountExist(account));
 	}
-	
+
+    @Operation(summary = "新增使用者")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @PostMapping
+    public Response createUser(@RequestBody UserVO vo) {
+        userService.createUser(vo);
+        return Response.ok();
+    }
 
     @Operation(summary = "更新使用者基本資料", description = "更新自己的資料")
 	@SecurityRequirement(name = Const.BEARER_JWT)
@@ -107,6 +115,14 @@ public class UserController {
 		userService.updateUser(userId, vo);
 		return Response.ok();
 	}
+
+    @Operation(summary = "更新密碼", description = "更新該登入使用者的密碼")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @PutMapping("/changePassword")
+    public Response changePassword(@RequestBody ChangePasswordPayload paylaod) {
+        userService.updateUserPassword(paylaod.getOldPassword(), paylaod.getNewPassword());
+        return Response.ok();
+    }
 
     @Schema(title = "登入資訊")
     @Data
@@ -141,7 +157,7 @@ public class UserController {
         private String email;
 
         @Schema(title = "所屬實驗室ID清單")
-        private List<String> labIdList = List.of();
+        private List<String> labList = List.of();
 
         public static LoginUserInfo of(String token,
                                        AuthUser user) {
@@ -151,7 +167,7 @@ public class UserController {
             info.role = user.getRole();
             info.name = user.getName();
             info.email = user.getEmail();
-            info.labIdList = user.getLabIdList();
+            info.labList = user.getLabList();
 
             return info;
         }
@@ -162,46 +178,10 @@ public class UserController {
             info.role = user.getRole();
             info.name = user.getName();
             info.email = user.getEmail();
-            info.labIdList = user.getLabIdList();
+            info.labList = user.getLabList();
 
             return info;
         }
-    }
-    
-    @Schema(title = "註冊使用者資料載體", accessMode = Schema.AccessMode.WRITE_ONLY)
-    @Data
-    private static class RegistUserPayload {
-    	
-    	@Schema(title = "帳號")
-    	private String account;
-    	
-    	@Schema(title = "密碼")
-    	private String password;
-
-		@Schema(title = "使用者類別")
-		private User.Role role;
-    	
-    	@Schema(title = "使用者名稱")
-    	private String name;
-
-		@Schema(title = "Email")
-		private String email;
-
-		@Schema(title = "所屬實驗室ID清單")
-		private List<String> labIdList = List.of();
-    	
-    	public UserVO toUserVo() {
-    		var vo = new UserVO();
-    		vo.setAccount(account);
-    		vo.setPassword(password);
-    		vo.setName(name);
-			vo.setEmail(email);
-			vo.setLabIdList(labIdList);
-            vo.setStatus(User.Status.ACTIVE);
-    		
-    		return vo;
-    	}
-    	
     }
 
     @Schema(title = "密碼變更資料載體")

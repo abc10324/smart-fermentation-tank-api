@@ -3,23 +3,21 @@ package com.walnutek.fermentationtank.model.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.walnutek.fermentationtank.config.mongo.AggregationLookupBuilder;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Laboratory;
 import com.walnutek.fermentationtank.model.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.AccessMode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Schema(title = "使用者VO")
 @Data
@@ -29,11 +27,11 @@ public class UserVO extends BaseColumns {
     @Schema(title = "帳號/Email")
     private String account;
 
-    @Schema(title = "密碼", accessMode = Schema.AccessMode.WRITE_ONLY)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Schema(title = "密碼", accessMode = AccessMode.WRITE_ONLY)
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
 
-    @Schema(title = "使用者類別", accessMode = Schema.AccessMode.READ_ONLY)
+    @Schema(title = "使用者類別")
     private User.Role role;
 
     @Schema(title = "使用者名稱")
@@ -42,11 +40,8 @@ public class UserVO extends BaseColumns {
     @Schema(title = "Email")
     private String email;
 
-    @JsonIgnore
-    private List<Laboratory> labList = List.of();
-
     @Schema(title = "所屬實驗室ID")
-    private List<String> labIdList = List.of();
+    private List<String> labList = List.of();
 
     @Schema(title = "所屬實驗室名稱", accessMode = Schema.AccessMode.READ_ONLY)
     private List<String> labNameList = List.of();
@@ -68,11 +63,11 @@ public class UserVO extends BaseColumns {
                 .orElse("未定義");
     }
 
-    public List<String> getLabIdList() {
-        return Objects.nonNull(labList) ?
-                labList.stream().map(Laboratory::getId).toList() :
-                labIdList;
-    }
+//    public List<String> getLabIdList() {
+//        return Objects.nonNull(labList) ?
+//                labList.stream().map(Laboratory::getId).toList() :
+//                labIdList;
+//    }
 
     public static UserVO of(User data) {
         var vo = new UserVO();
@@ -95,11 +90,7 @@ public class UserVO extends BaseColumns {
         data.setPassword(password);
         data.setName(name);
         data.setEmail(email);
-
-        if(Objects.nonNull(labIdList)) {
-            data.setLabList(labIdList.stream().map(ObjectId::new).toList());
-        }
-
+        data.setLabList(labList);
         data.setRole(role);
         data.setStatus(status);
         data.setLoginCount(loginCount);
@@ -124,7 +115,8 @@ public class UserVO extends BaseColumns {
                 .on(User::getLabList, Laboratory::getId)
                 .mappingTo(UserVO.class)
                 .asArrayField()
-                .mapping(UserVO::getLabList)
+//                .mapping(Laboratory::getId, UserVO::getLabList)
+                .mapping(Laboratory::getName, UserVO::getLabNameList)
                 .build();
     }
     

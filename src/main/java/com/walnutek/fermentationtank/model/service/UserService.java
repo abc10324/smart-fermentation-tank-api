@@ -60,10 +60,20 @@ public class UserService extends BaseService {
     public void updateUser(String id, UserVO vo) {
     	if(isUserExist(id)) {
     		var data = userDao.selectById(id);
+
+            if(!Objects.equals(data.getAccount(), vo.getAccount()) && isAccountExist(vo.getAccount())) {
+                throw new AppException(Code.E002, "欲更改的帳號已存在");
+            }
+
+            data.setAccount(vo.getAccount());
 			data.setName(vo.getName());
 			data.setEmail(vo.getEmail());
-			data.setLabList(vo.getLabIdList().stream().map(ObjectId::new).toList());
-    		
+			data.setLabList(vo.getLabList());
+
+            if(StringUtils.hasText(vo.getPassword())) {
+                data.setPassword(encryptPassword(vo.getPassword()));
+            }
+
     		userDao.updateById(data);
     	} else {
     		throw new AppException(Code.E002, "無法更新不存在的使用者");
