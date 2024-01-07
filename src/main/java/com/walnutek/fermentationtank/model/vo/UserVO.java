@@ -31,7 +31,7 @@ public class UserVO extends BaseColumns {
     @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
 
-    @Schema(title = "使用者類別")
+    @Schema(title = "使用者類別", accessMode = AccessMode.READ_ONLY)
     private User.Role role;
 
     @Schema(title = "使用者名稱")

@@ -124,6 +124,27 @@ public class UserController {
         return Response.ok();
     }
 
+    @Operation(summary = "取得自己可用的實驗室清單")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @GetMapping("/{userId}/option/availableLab")
+    public List<OptionVO> getAvailableLabOptionList(@Parameter(description = "使用者ID")
+                                                    @PathVariable("userId") String userId) {
+        return userService.getAvailableLabList(userId)
+                .stream()
+                .map(vo -> OptionVO.of(vo.getId(), vo.getName()))
+                .toList();
+    }
+
+    @Operation(summary = "取得自己所屬的實驗室清單")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @GetMapping("/option/ownLab")
+    public List<OptionVO> getOwnLabOptionList() {
+        return userService.getOwnLabList()
+                    .stream()
+                    .map(vo -> OptionVO.of(vo.getId(), vo.getName()))
+                    .toList();
+    }
+
     @Schema(title = "登入資訊")
     @Data
     private static class LoginInfo {

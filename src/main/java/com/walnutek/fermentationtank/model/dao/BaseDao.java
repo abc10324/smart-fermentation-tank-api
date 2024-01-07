@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 
 import static com.walnutek.fermentationtank.model.service.Utils.field;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 public abstract class BaseDao<T extends BaseColumns> {
 
@@ -175,13 +176,13 @@ public abstract class BaseDao<T extends BaseColumns> {
         return Sort.by(targetSortDirection, targetSortField);
     }
 
-    public T selectById(Object id) {
+    public T selectById(String id) {
         return template.findById(id, TYPE_REF);
     }
     
-    public <O> O selectById(Object id, Class<O> to) {
+    public <O> O selectById(String id, Class<O> to) {
     	List<AggregationOperation> aggregationList = new ArrayList<>();
-    	aggregationList.add(match(Criteria.where(field(BaseColumns::getId)).is(id)));
+    	aggregationList.add(match(where(field(BaseColumns::getId)).is(id)));
         aggregationList.addAll(getLookupAggregation(to));
     	
         return template.aggregate(newAggregation(TYPE_REF, aggregationList), to)
@@ -191,7 +192,20 @@ public abstract class BaseDao<T extends BaseColumns> {
 					   .orElse(null);
     }
 
-    public boolean existById(Object id) {
+    public List<T> selectByIds(List<String> idList) {
+        return template.find(Query.query(where(field(BaseColumns::getId)).in(idList)), TYPE_REF);
+    }
+
+    public <O> List<O> selectByIds(List<String> idList, Class<O> to) {
+        List<AggregationOperation> aggregationList = new ArrayList<>();
+        aggregationList.add(match(where(field(BaseColumns::getId)).in(idList)));
+        aggregationList.addAll(getLookupAggregation(to));
+
+        return template.aggregate(newAggregation(TYPE_REF, aggregationList), to)
+                .getMappedResults();
+    }
+
+    public boolean existById(String id) {
         return Objects.nonNull(selectById(id));
     }
 
@@ -214,7 +228,7 @@ public abstract class BaseDao<T extends BaseColumns> {
                 .ifPresent(userId -> update.set(field(BaseColumns::getUpdateUser), userId));
 
         return template.update(TYPE_REF)
-                .matching(Criteria.where(field(BaseColumns::getId)).is(id))
+                .matching(where(field(BaseColumns::getId)).is(id))
                 .apply(update)
                 .findAndModify();
     }
@@ -223,7 +237,7 @@ public abstract class BaseDao<T extends BaseColumns> {
         repository.save(data);
     }
 
-    public void deleteById(Object id) {
+    public void deleteById(String id) {
         if(existById(id)) {
             template.remove(selectById(id));
         }

@@ -96,7 +96,7 @@ public class User extends BaseColumns {
 	public enum Role {
 		SUPER_ADMIN("超級管理者"),
 		LAB_ADMIN("實驗室管理者"),
-		LAB_USER("實驗室使用者");
+		LAB_USER("實驗室員工");
 
 		private String name;
 
