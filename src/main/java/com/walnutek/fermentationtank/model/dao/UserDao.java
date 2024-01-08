@@ -1,5 +1,6 @@
 package com.walnutek.fermentationtank.model.dao;
 
+import com.walnutek.fermentationtank.config.auth.Auth;
 import com.walnutek.fermentationtank.config.auth.AuthUser;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.config.mongo.UpdateBuilder;
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,14 +32,25 @@ public class UserDao extends BaseDao<User> {
     }
 
     private QueryCondition getQueryCondition(Map<String,Object> paramMap) {
+        var loginUser = Auth.getAuthUser();
         var criteriaList = Stream.of(
                 where(User::getRole).ne(User.Role.SUPER_ADMIN),
+                where(User.Role.LAB_ADMIN.equals(loginUser.getRole()), User::getRole).is(User.Role.LAB_USER),
                 where(hasText(paramMap.get("keyword")), UserVO::getAccount).like(paramMap.get("keyword"))
                         .or(where(UserVO::getName).like(paramMap.get("keyword")))
                         .or(where(UserVO::getEmail).like(paramMap.get("keyword")))
             ).map(CriteriaBuilder::build)
             .filter(Objects::nonNull)
             .toList();
+
+        if(User.Role.LAB_ADMIN.equals(loginUser.getRole())) {
+            criteriaList = new ArrayList<>(criteriaList);
+            criteriaList.addAll(Stream.of(
+                where(User::getRole).is(User.Role.LAB_USER),
+                where(User::getAdminId).is(loginUser.getUserId())
+            ).map(CriteriaBuilder::build)
+            .toList());
+        }
 
         var sort = getSort(paramMap);
         var pageable = getPageable(paramMap);

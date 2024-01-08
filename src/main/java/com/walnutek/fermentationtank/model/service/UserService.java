@@ -57,6 +57,10 @@ public class UserService extends BaseService {
             data.setRole(targetRole);
             data.setPassword(encryptPassword(data.getPassword()));
 
+            if(User.Role.LAB_ADMIN.equals(data.getRole())) {
+                data.setLabList(List.of());
+            }
+
             userDao.insert(data);
 
 			return data.getId();
