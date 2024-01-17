@@ -3,7 +3,9 @@ package com.walnutek.fermentationtank.model.dao;
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.config.auth.Auth;
 import com.walnutek.fermentationtank.config.auth.AuthUser;
+import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
+import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.Page;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
@@ -38,34 +40,34 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 public abstract class BaseDao<T extends BaseColumns> {
 
     @SuppressWarnings("unchecked")
-	private final Class<T> TYPE_REF = (Class<T>) GenericTypeResolver.resolveTypeArgument(getClass(), BaseDao.class);
+	private final Class<T>  TYPE_REF = (Class<T>) GenericTypeResolver.resolveTypeArgument(getClass(), BaseDao.class);
 
     @Autowired
     private MongoTemplate template;
-    
+
     @Autowired
     private MongoConverter mongoConverter;
-    
+
     private MongoRepository<T, String> repository;
-    
+
     @PostConstruct
     private void init() {
     	initMongoRepository();
     }
-    
+
     private void initMongoRepository() {
-    	
+
     	if (mongoConverter.getMappingContext() instanceof MongoMappingContext context) {
     		@SuppressWarnings("unchecked")
 			var persistentEntity = (MongoPersistentEntity<T>) context.getPersistentEntity(TYPE_REF);
-    		
+
     		if(Objects.nonNull(persistentEntity)) {
     			var mappingMongoEntityInformation = new MappingMongoEntityInformation<T, String>(persistentEntity, String.class);
     			repository = new SimpleMongoRepository<T, String>(mappingMongoEntityInformation, template);
     		}
     	}
     }
-    
+
     public List<T> selectAll() {
         return template.findAll(TYPE_REF);
     }
@@ -105,11 +107,11 @@ public abstract class BaseDao<T extends BaseColumns> {
                 condition.pageable,
                 () -> totalCount));
     }
-    
+
     protected <O> Page<O> aggregationSearch(QueryCondition condition, Class<O> to) {
         return aggregationSearch(condition, TYPE_REF, to);
     }
-    
+
     protected <T, O> Page<O> aggregationSearch(QueryCondition condition, Class<T> from, Class<O> to) {
         var validPageable = getValidPageable(condition.pageable);
 
@@ -127,7 +129,7 @@ public abstract class BaseDao<T extends BaseColumns> {
         aggregationList.add(skip(validPageable.getOffset()));
         aggregationList.add(sort(condition.sort));
         aggregationList.add(limit(validPageable.getPageSize()));
-    	
+
     	var resultList = template.aggregate(newAggregation(from, aggregationList), to)
     							 .getMappedResults();
 
@@ -179,12 +181,19 @@ public abstract class BaseDao<T extends BaseColumns> {
     public T selectById(String id) {
         return template.findById(id, TYPE_REF);
     }
-    
+
+    public T selectByIdAndStatus(String id, BaseColumns.Status status) {
+        var query = new Query();
+        query.addCriteria(CriteriaBuilder.where("status").is(status).build());
+        query.addCriteria(CriteriaBuilder.where(BaseColumns::getId).is(id).build());
+        return template.findOne(query, TYPE_REF);
+    }
+
     public <O> O selectById(String id, Class<O> to) {
     	List<AggregationOperation> aggregationList = new ArrayList<>();
     	aggregationList.add(match(where(field(BaseColumns::getId)).is(id)));
         aggregationList.addAll(getLookupAggregation(to));
-    	
+
         return template.aggregate(newAggregation(TYPE_REF, aggregationList), to)
 					   .getMappedResults()
 					   .stream()
@@ -242,20 +251,20 @@ public abstract class BaseDao<T extends BaseColumns> {
             template.remove(selectById(id));
         }
     }
-    
+
     private <O> List<AggregationOperation> getLookupAggregation(Class<O> target) {
     	List<AggregationOperation> aggregationList = new ArrayList<>();
-    	
+
     	try {
 			var method = target.getMethod("getLookupAggregation");
-			
+
 			@SuppressWarnings("unchecked")
 			var lookupAggregation = (List<AggregationOperation>) method.invoke(null);
 			aggregationList.addAll(lookupAggregation);
         } catch (Exception e) {
 //			e.printStackTrace();
 		}
-    	
+
     	return aggregationList;
     }
 
@@ -288,23 +297,23 @@ public abstract class BaseDao<T extends BaseColumns> {
 
             return vo;
         }
-        
+
         public Query toQuery() {
         	var query = new Query();
         	criteriaList.forEach(query::addCriteria);
-            
+
             return query;
         }
-        
+
         public Query toPagedQuery() {
         	var query = toQuery();
-        	
+
         	query.with(sort);
             query.with(pageable);
-            
+
             return query;
         }
-        
+
     }
-    
+
 }
