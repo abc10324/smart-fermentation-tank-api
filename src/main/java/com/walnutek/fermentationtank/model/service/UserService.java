@@ -5,12 +5,10 @@ import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
-import com.walnutek.fermentationtank.model.dao.UserDao;
 import com.walnutek.fermentationtank.model.entity.Laboratory;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.UserVO;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +22,8 @@ import java.util.*;
 public class UserService extends BaseService {
 
     @Autowired
-    private UserDao userDao;
-
-    @Autowired
     private LaboratoryDao laboratoryDao;
-    
+
     @Autowired
     private CipherService cipherService;
 
@@ -36,13 +31,8 @@ public class UserService extends BaseService {
         return userDao.search(paramMap);
     }
 
-
-
-
     public String createUser(UserVO vo) {
-        var user = Optional.ofNullable(userDao.selectById(getLoginUserId()))
-                        .orElseThrow(() -> new AppException(Code.E004));
-
+        var user = getLoginUser();
         var targetRole = switch (user.getRole()) {
             case SUPER_ADMIN -> User.Role.LAB_ADMIN;
             case LAB_ADMIN -> User.Role.LAB_USER;
@@ -73,9 +63,9 @@ public class UserService extends BaseService {
 
 
     public void updateUser(UserVO vo) {
-		updateUser(getLoginUserId(), vo);
+        updateUser(getLoginUserId(), vo);
 	}
-    
+
     public void updateUser(String id, UserVO vo) {
     	if(isUserExist(id)) {
     		var data = userDao.selectById(id);
@@ -98,7 +88,7 @@ public class UserService extends BaseService {
     		throw new AppException(Code.E002, "無法更新不存在的使用者");
     	}
     }
-    
+
     private boolean isUserExist(String id) {
     	return userDao.existById(id);
     }
@@ -110,8 +100,8 @@ public class UserService extends BaseService {
                 .orElse(password);
     }
 
-    public AuthUser getLoginUser(String account, String password) {
-        var user = Optional.ofNullable(userDao.getLoginUser(account, encryptPassword(password)))
+    public AuthUser UserLoginCheck(String account, String password) {
+        var user = Optional.ofNullable(userDao.getUserByAccountAndPassword(account, encryptPassword(password)))
                            .orElseThrow(() -> new AppException(Code.E001));
         userValidCheck(user.getUserId());
         addLoginCount(user.getUserId());
@@ -120,8 +110,9 @@ public class UserService extends BaseService {
     }
 
     public AuthUser getLoginUserInfo() {
-        userValidCheck(getLoginUserId());
-        return userDao.getLoginUserInfo(getLoginUserId());
+        var userId = getLoginUserId();
+        userValidCheck(userId);
+        return userDao.getLoginUserInfo(userId);
     }
 
     private void addLoginCount(String userId) {
@@ -143,42 +134,33 @@ public class UserService extends BaseService {
     }
 
     public UserVO getUserProfile() {
-		return Optional.ofNullable(userDao.selectById(getLoginUserId(), UserVO.class))
-					   .map(vo -> {
-						   vo.setPassword(null);
-						   return vo;
-					   })
-					   .orElseThrow(() -> new AppException(Code.E004));
+        var user = getLoginUser();
+        user.setPassword(null);
+        return UserVO.of(user);
 	}
 
     public void updateUserStatus(String userId, User.Status isActive) {
         var user = Optional.ofNullable(userDao.selectById(userId))
                            .orElseThrow(() -> new AppException(Code.E004));
         user.setStatus(isActive);
-
         userDao.updateById(user);
     }
-    
+
     public boolean isAccountExist(String account) {
-		return userDao.isAccountExist(account);
+        return userDao.isAccountExist(account);
 	}
 
 	public void updateUserPassword(String oldPassword, String newPassword) {
-		var user = Optional.ofNullable(userDao.selectById(getLoginUserId()))
-						   .orElseThrow(() -> new AppException(Code.E004));
-		
-		if(!user.getPassword().equals(encryptPassword(oldPassword))) {
+        var user = getLoginUser();
+        if(!user.getPassword().equals(encryptPassword(oldPassword))) {
 			throw new AppException(Code.E006);
 		}
-		
 		user.setPassword(encryptPassword(newPassword));
 		userDao.updateById(user);
 	}
 
     public List<Laboratory> getAvailableLabList(String userId) {
-        var user = Optional.ofNullable(userDao.selectById(userId))
-                    .orElseThrow(() -> new AppException(Code.E004));
-
+        var user = getLoginUser();
         List<Laboratory> resultList = new ArrayList<>();
 
         switch (user.getRole()) {
@@ -196,9 +178,7 @@ public class UserService extends BaseService {
 
     public List<Laboratory> getOwnLabList() {
         List<Laboratory> resultList = new ArrayList<>();
-        var user = Optional.ofNullable(userDao.selectById(getLoginUserId()))
-                    .orElseThrow(() -> new AppException(Code.E004));
-
+        var user = getLoginUser();
         switch (user.getRole()) {
             case SUPER_ADMIN -> laboratoryDao.selectAll().forEach(resultList::add);
             case LAB_ADMIN -> laboratoryDao.selectByOwnerId(getLoginUserId()).forEach(resultList::add);
@@ -207,7 +187,6 @@ public class UserService extends BaseService {
                                 .map(laboratoryDao::selectByIds)
                                 .ifPresent(resultList::addAll);
         }
-
         return resultList;
     }
 

@@ -57,7 +57,7 @@ public class UserDao extends BaseDao<User> {
 
         return QueryCondition.of(criteriaList, sort, pageable);
     }
-    
+
     public boolean isAccountExist(String account) {
         var query = new Query();
         query.addCriteria(where(User::getAccount).is(account).build());
@@ -65,11 +65,11 @@ public class UserDao extends BaseDao<User> {
         return template.exists(query, User.class);
     }
 
-    public AuthUser getLoginUser(String account, String password) {
+    public AuthUser getUserByAccountAndPassword(String account, String password) {
         var query = new Query();
         query.addCriteria(where(User::getAccount).is(account).build());
         query.addCriteria(where(User::getPassword).is(password).build());
-        
+
         return Optional.ofNullable(template.findOne(query, User.class))
                        .map(AuthUser::of)
                        .orElse(null);

@@ -1,40 +1,22 @@
 package com.walnutek.fermentationtank.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.walnutek.fermentationtank.config.Const;
-import com.walnutek.fermentationtank.config.auth.Auth;
 import com.walnutek.fermentationtank.config.auth.AuthUser;
 import com.walnutek.fermentationtank.config.auth.HasRole;
 import com.walnutek.fermentationtank.config.auth.JwtService;
-import com.walnutek.fermentationtank.exception.AppException;
-import com.walnutek.fermentationtank.exception.AppException.Code;
-import com.walnutek.fermentationtank.model.dao.UserDao;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.UserService;
-import com.walnutek.fermentationtank.model.service.Utils;
 import com.walnutek.fermentationtank.model.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Tag(name = "使用者")
 @RestController
@@ -62,7 +44,7 @@ public class UserController {
     @Operation(summary = "登入")
     @PostMapping("/login")
     public LoginUserInfo login(@RequestBody LoginInfo loginInfo) {
-        var user = userService.getLoginUser(loginInfo.getAccount(), loginInfo.getPassword());
+        var user = userService.UserLoginCheck(loginInfo.getAccount(), loginInfo.getPassword());
         var token = jwtService.generateToken(user);
 
         return LoginUserInfo.of(token, user);
@@ -74,18 +56,17 @@ public class UserController {
     public LoginUserInfo getUserInfo(){
         return LoginUserInfo.of(userService.getLoginUserInfo());
     }
-    
+
 	@Operation(summary = "取得登入使用者個人頁面資訊")
 	@SecurityRequirement(name = Const.BEARER_JWT)
 	@GetMapping("/profile")
 	public UserVO getUserProfile(){
 		return userService.getUserProfile();
 	}
-	
+
 	@Operation(summary = "檢查帳號是否存在")
 	@GetMapping("/exist/{account}")
-	public AccountExistResponse isAccountExist(@Parameter(name = "account", description = "使用者帳號") 
-											   @PathVariable String account){
+	public AccountExistResponse isAccountExist(@Parameter(name = "account", description = "使用者帳號") @PathVariable String account){
 		return AccountExistResponse.of(userService.isAccountExist(account));
 	}
 
@@ -104,14 +85,15 @@ public class UserController {
 		userService.updateUser(vo);
 		return Response.ok();
 	}
-	
+
 	@Operation(summary = "更新使用者基本資料", description = "更新別人的資料")
 	@SecurityRequirement(name = Const.BEARER_JWT)
 	@HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
 	@PutMapping("/{userId}")
-	public Response updateUser(@Parameter(name = "userId", description = "使用者ID")  
+	public Response updateUser(@Parameter(name = "userId", description = "使用者ID")
 							   @PathVariable String userId,
-							   @RequestBody UserVO vo) {
+							   @RequestBody UserVO vo
+    ) {
 		userService.updateUser(userId, vo);
 		return Response.ok();
 	}
@@ -127,8 +109,7 @@ public class UserController {
     @Operation(summary = "取得自己可用的實驗室清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
     @GetMapping("/{userId}/option/availableLab")
-    public List<OptionVO> getAvailableLabOptionList(@Parameter(description = "使用者ID")
-                                                    @PathVariable("userId") String userId) {
+    public List<OptionVO> getAvailableLabOptionList(@Parameter(description = "使用者ID") @PathVariable("userId") String userId) {
         return userService.getAvailableLabList(userId)
                 .stream()
                 .map(vo -> OptionVO.of(vo.getId(), vo.getName()))
@@ -219,14 +200,14 @@ public class UserController {
     @Schema(title = "帳號存在檢查回傳資料")
 	@Data
 	private static class AccountExistResponse {
-		
-		@Schema(title = "帳號是否存在") 
+
+		@Schema(title = "帳號是否存在")
 		private Boolean isAccountExist;
-		
+
 		public static AccountExistResponse of(Boolean isAccountExist) {
 			var vo = new AccountExistResponse();
 			vo.isAccountExist = isAccountExist;
-			
+
 			return vo;
 		}
 	}
