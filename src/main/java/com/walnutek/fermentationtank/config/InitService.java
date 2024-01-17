@@ -19,7 +19,14 @@ public class InitService {
 
     private static final List<String> COLLECTION_LIST = List.of(
             Const.COLLECTION_USER,
-            Const.COLLECTION_LABORATORY
+            Const.COLLECTION_LABORATORY,
+            Const.COLLECTION_PROJECT,
+            Const.COLLECTION_FERMENTER,
+            Const.COLLECTION_SENSOR,
+            Const.COLLECTION_SENSOR_RECORD,
+            Const.COLLECTION_LINE_NOTIFY,
+            Const.COLLECTION_ALERT,
+            Const.COLLECTION_ALERT_RECORD
     );
 
     public void init() {
@@ -49,6 +56,4 @@ public class InitService {
 
         template.save(data);
     }
-
-
 }

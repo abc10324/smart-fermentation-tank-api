@@ -17,17 +17,17 @@ public class ShutdownActurator implements ApplicationContextAware  {
 
 	@Autowired
 	private InitService initService;
-	
+
 	@Scheduled(initialDelay = 5000L, fixedDelay = 1000L)
 	public void shutdown() {
 		initService.init();
 		int exitCode = SpringApplication.exit(context, () -> 0);
 		System.exit(exitCode);
 	}
-	
+
 	@Override
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
         this.context = ctx;
     }
-	
+
 }
