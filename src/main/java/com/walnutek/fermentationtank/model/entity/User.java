@@ -7,7 +7,6 @@ import com.walnutek.fermentationtank.exception.AppException.Code;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -30,6 +29,7 @@ public class User extends BaseColumns {
 	/**
 	 * 管理者ID(實驗室使用者填入實驗室管理者的ID)
 	 */
+	@Field(targetType = FieldType.OBJECT_ID)
 	private String adminId;
 
 	/**
@@ -47,7 +47,7 @@ public class User extends BaseColumns {
 	 * 使用者類別
 	 */
 	private Role role;
-	
+
 	/**
 	 * 使用者名稱
 	 */
@@ -68,30 +68,18 @@ public class User extends BaseColumns {
 	 * 帳號狀態
 	 */
 	private Status status = Status.ACTIVE;
-	
+
 	/**
 	 * 登入次數
 	 */
 	private Integer loginCount = 0;
-	
+
 	/**
 	 * 最後登入時間
 	 */
 	@JsonFormat(pattern = "yyyy/MM/dd HH:mm")
 	private LocalDateTime lastLoginTime;
 
-	@Getter
-	public enum Status {
-		DELETED( "刪除"),
-		ACTIVE("啟用");
-		
-		private String name;
-		
-		Status(String name) {
-			this.name = name;
-		}
-	}
-	
 	@Getter
 	public enum Role {
 		SUPER_ADMIN("超級管理者"),
@@ -106,16 +94,16 @@ public class User extends BaseColumns {
 
 		public static Role parse(String roleStr) {
 			Role result = null;
-			
+
 			for(Role role : Role.values()) {
 				if(role.name().toLowerCase().equals(roleStr.toLowerCase())) {
 					result = role;
 				}
 			}
-			
+
 			return Optional.ofNullable(result)
 						   .orElseThrow(() -> new AppException(Code.E000, "錯誤的使用者類別"));
 		}
 	}
-	
+
 }

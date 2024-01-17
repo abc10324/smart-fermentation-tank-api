@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.AccessMode;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 
 /**
  * Extending this class to have below fields and use system auto update mechanism to deal with it
- * 
+ *
  * if you use @Data , please add @EqualsAndHashCode(callSuper = false) for dismiss the warning
  * @author Walnutek-Sam
  *
@@ -29,7 +30,7 @@ public class BaseColumns {
 	@Id
 	@JsonInclude(Include.NON_NULL)
 	private String id;
-	
+
 	/**
 	 * 新增資料時間
 	 */
@@ -38,7 +39,7 @@ public class BaseColumns {
 	@CreatedDate
 	@JsonInclude(Include.NON_NULL)
 	private LocalDateTime createTime;
-	
+
 	/**
 	 * 新增資料的使用者
 	 */
@@ -47,7 +48,7 @@ public class BaseColumns {
 	@Field(targetType = FieldType.OBJECT_ID)
 	@JsonInclude(Include.NON_NULL)
 	private String createUser;
-	
+
 	/**
 	 * 更新資料時間
 	 */
@@ -80,5 +81,17 @@ public class BaseColumns {
 		target.setUpdateTime(source.getUpdateTime());
 		target.setUpdateUser(source.getUpdateUser());
 	}
-	
+
+	@Getter
+	public enum Status {
+		DELETED( "刪除"),
+		ACTIVE("啟用");
+
+		private String name;
+
+		Status(String name) {
+			this.name = name;
+		}
+	}
+
 }

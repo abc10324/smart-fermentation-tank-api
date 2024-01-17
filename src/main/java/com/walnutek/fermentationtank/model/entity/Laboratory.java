@@ -33,4 +33,9 @@ public class Laboratory extends BaseColumns {
      */
     private String note;
 
+    /**
+     * 實驗室狀態
+     */
+    private Status status = Status.ACTIVE;
+
 }
