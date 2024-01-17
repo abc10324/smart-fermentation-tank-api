@@ -30,7 +30,7 @@ public class CriteriaBuilder {
 	private List<Criteria> orCriteriaList = new ArrayList<>();
 
 	private CriteriaBuilder() {}
-	
+
 	/**
 	 * Static factory method to create a Criteria using the provided key
 	 *
@@ -55,7 +55,7 @@ public class CriteriaBuilder {
 		builder.criteria = Criteria.where(field(fieldGetter));
 		return builder;
 	}
-	
+
 	/**
 	 * Static factory method to create a Criteria using the provided keys
 	 *
@@ -68,7 +68,13 @@ public class CriteriaBuilder {
 		builder.criteria = Criteria.where(String.join(".", field(sourceFieldGetter), field(targetFieldGetter)));
 		return builder;
 	}
-	
+
+	public static <T> CriteriaBuilder where(String key) {
+		var builder = new CriteriaBuilder();
+		builder.criteria = Criteria.where(key);
+		return builder;
+	}
+
 	/**
 	 * Static factory method to create a {@link Criteria} matching a documents against the given {@link MongoExpression
 	 * expression}.
@@ -96,7 +102,7 @@ public class CriteriaBuilder {
 		builder.criteria = Criteria.expr(expression);
 		return builder;
 	}
-	
+
 	/**
 	 * Static factory method to create a Criteria using the provided key
 	 *
@@ -106,7 +112,7 @@ public class CriteriaBuilder {
 		criteria = criteria.and(field(fieldGetter));
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using equality
 	 *
@@ -117,7 +123,7 @@ public class CriteriaBuilder {
 		criteria = criteria.is(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using {@literal null} equality comparison which matches documents that either contain the item
 	 * field whose value is {@literal null} or that do not contain the item field. <br />
@@ -133,7 +139,7 @@ public class CriteriaBuilder {
 	public CriteriaBuilder isNull() {
 		return is(null);
 	}
-	
+
 	/**
 	 * Creates a criterion using a {@link org.bson.BsonType} comparison which matches only documents that contain the item
 	 * field whose value is equal to {@link org.bson.BsonType#NULL}. <br />
@@ -150,7 +156,7 @@ public class CriteriaBuilder {
 		criteria = criteria.isNullValue();
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $ne} operator.
 	 *
@@ -162,7 +168,7 @@ public class CriteriaBuilder {
 		criteria = criteria.ne(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $lt} operator.
 	 *
@@ -174,7 +180,7 @@ public class CriteriaBuilder {
 		criteria = criteria.lt(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $lte} operator.
 	 *
@@ -186,7 +192,7 @@ public class CriteriaBuilder {
 		criteria = criteria.lte(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $gt} operator.
 	 *
@@ -198,7 +204,7 @@ public class CriteriaBuilder {
 		criteria = criteria.gt(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $gte} operator.
 	 *
@@ -210,7 +216,7 @@ public class CriteriaBuilder {
 		criteria = criteria.gte(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $in} operator.
 	 *
@@ -222,7 +228,7 @@ public class CriteriaBuilder {
 		criteria = criteria.in(values);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $in} operator.
 	 *
@@ -234,7 +240,7 @@ public class CriteriaBuilder {
 		criteria = criteria.in(values);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $nin} operator.
 	 *
@@ -257,7 +263,7 @@ public class CriteriaBuilder {
 		criteria = criteria.nin(values);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $mod} operator.
 	 *
@@ -270,7 +276,7 @@ public class CriteriaBuilder {
 		criteria = criteria.mod(value, remainder);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $all} operator.
 	 *
@@ -281,7 +287,7 @@ public class CriteriaBuilder {
 	public CriteriaBuilder all(Object... values) {
 		return all(Arrays.asList(values));
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $all} operator.
 	 *
@@ -293,7 +299,7 @@ public class CriteriaBuilder {
 		criteria = criteria.all(values);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $size} operator.
 	 *
@@ -305,7 +311,7 @@ public class CriteriaBuilder {
 		criteria = criteria.size(size);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $exists} operator.
 	 *
@@ -317,7 +323,7 @@ public class CriteriaBuilder {
 		criteria = criteria.exists(value);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $sampleRate} operator.
 	 *
@@ -332,7 +338,7 @@ public class CriteriaBuilder {
 		criteria = criteria.sampleRate(sampleRate);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $type} operator.
 	 *
@@ -344,7 +350,7 @@ public class CriteriaBuilder {
 		criteria = criteria.type(typeNumber);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $type} operator.
 	 *
@@ -356,7 +362,7 @@ public class CriteriaBuilder {
 	public CriteriaBuilder type(Type... types) {
 		return type(Arrays.asList(types));
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $type} operator.
 	 *
@@ -369,7 +375,7 @@ public class CriteriaBuilder {
 		criteria = criteria.type(types);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $not} meta operator which affects the clause directly following
 	 *
@@ -403,7 +409,7 @@ public class CriteriaBuilder {
 	public CriteriaBuilder regex(String regex) {
 		return regex(regex, null);
 	}
-	
+
 	/**
 	 * Creates a criterion using a {@literal $regex} and {@literal $options} operator.
 	 *
@@ -416,7 +422,7 @@ public class CriteriaBuilder {
 		criteria = criteria.regex(regex, options);
 		return this;
 	}
-	
+
 	/**
 	 * Syntactical sugar for {@link #is(Object)} making obvious that we create a regex predicate.
 	 *
@@ -438,7 +444,7 @@ public class CriteriaBuilder {
 		criteria = criteria.regex(regex);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a geospatial criterion using a {@literal $geoWithin $centerSphere} operation. This is only available for
 	 * Mongo 2.4 and higher.
@@ -454,7 +460,7 @@ public class CriteriaBuilder {
 		criteria = criteria.withinSphere(circle);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a geospatial criterion using a {@literal $geoWithin} operation.
 	 *
@@ -467,7 +473,7 @@ public class CriteriaBuilder {
 		criteria = criteria.within(shape);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a geospatial criterion using a {@literal $near} operation.
 	 *
@@ -479,7 +485,7 @@ public class CriteriaBuilder {
 		criteria = criteria.near(point);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a geospatial criterion using a {@literal $nearSphere} operation. This is only available for Mongo 1.7 and
 	 * higher.
@@ -493,7 +499,7 @@ public class CriteriaBuilder {
 		criteria = criteria.nearSphere(point);
 		return this;
 	}
-	
+
 	/**
 	 * Creates criterion using {@code $geoIntersects} operator which matches intersections of the given {@code geoJson}
 	 * structure and the documents one. Requires MongoDB 2.4 or better.
@@ -507,7 +513,7 @@ public class CriteriaBuilder {
 		criteria = criteria.intersects(geoJson);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a geo-spatial criterion using a {@literal $maxDistance} operation, for use with {@literal $near} or
 	 * {@literal $nearSphere}.
@@ -524,7 +530,7 @@ public class CriteriaBuilder {
 		criteria = criteria.maxDistance(maxDistance);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a geospatial criterion using a {@literal $minDistance} operation, for use with {@literal $near} or
 	 * {@literal $nearSphere}.
@@ -540,7 +546,7 @@ public class CriteriaBuilder {
 		criteria = criteria.minDistance(minDistance);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criterion using the {@literal $elemMatch} operator
 	 *
@@ -587,7 +593,7 @@ public class CriteriaBuilder {
 		criteria = criteria.orOperator(criteriaList);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criteria using the {@code $nor} operator for all of the provided criteria.
 	 * <p>
@@ -615,7 +621,7 @@ public class CriteriaBuilder {
 		criteria = criteria.norOperator(criteriaList);
 		return this;
 	}
-	
+
 	/**
 	 * Creates a criteria using the {@code $and} operator for all of the provided criteria.
 	 * <p>
@@ -643,7 +649,7 @@ public class CriteriaBuilder {
 		criteria = criteria.andOperator(criteriaList);
 		return this;
 	}
-	
+
 	public Criteria build() {
 		return needBuild ?
 				chainByOr ? orBuild() : criteria :
@@ -657,5 +663,5 @@ public class CriteriaBuilder {
 
 		return new Criteria().orOperator(orCriteriaList);
 	}
-	
+
 }
