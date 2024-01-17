@@ -1,8 +1,10 @@
 package com.walnutek.fermentationtank.model.vo;
 
+import com.walnutek.fermentationtank.model.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -25,7 +27,18 @@ public class Page<T> {
     @Schema(title = "總頁數")
     private Long pages = 1L;
 
-    private Page() {}
+    public Page() {}
+
+    public Page<T> EmptyPage() {
+        var data = new Page();
+        List<T> emptyList = new ArrayList<>();
+        data.setRecords(emptyList);
+        data.setTotal(0L);
+        data.setSize(0L);
+        data.setCurrent(1L);
+        data.setPages(1L);
+        return data;
+    }
 
     public static <T> Page<T> of(org.springframework.data.domain.Page<T> source) {
         var vo = new Page<T>();
