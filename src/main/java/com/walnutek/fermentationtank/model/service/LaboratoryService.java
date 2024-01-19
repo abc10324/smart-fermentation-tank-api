@@ -1,46 +1,35 @@
 package com.walnutek.fermentationtank.model.service;
 
-import com.walnutek.fermentationtank.config.auth.Auth;
 import com.walnutek.fermentationtank.exception.AppException;
-import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
-import com.walnutek.fermentationtank.model.dao.UserDao;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.LaboratoryVO;
 import com.walnutek.fermentationtank.model.vo.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 
+import static com.walnutek.fermentationtank.model.entity.User.Role.SUPER_ADMIN;
+
 @Service
 @Transactional
 public class LaboratoryService extends BaseService {
 
-    @Autowired
-    private UserDao userDao;
-
-    @Autowired
-    private LaboratoryDao laboratoryDao;
-
     public Page<LaboratoryVO> search(Map<String, Object> paramMap) {
+        Page<LaboratoryVO> result = Page.emptyPage();
         var user = getLoginUser();
-        var userId = getLoginUserId();
+        var userId = user.getId();
         List<String> labList = new ArrayList<>();
-        var result = new Page().EmptyPage();
         switch (user.getRole()) {
-            case LAB_ADMIN -> {
-                labList = laboratoryDao.selectByOwnerId(userId).stream().map(BaseColumns::getId).toList();
-            }
-            case LAB_USER -> {
-                labList = userDao.getLoginUserInfo(userId).getLabList();
-                if(labList.isEmpty()){
-                    return result;
-                }
-            }
+            case LAB_ADMIN -> labList = laboratoryDao.selectByOwnerId(userId).stream().map(BaseColumns::getId).toList();
+            case LAB_USER -> labList = userDao.getLoginUserInfo(userId).getLabList();
         }
+        if(!SUPER_ADMIN.equals(user.getRole()) && labList.isEmpty()){
+            return result;
+        }
+
         paramMap.put("labList",labList);
         result = laboratoryDao.search(paramMap);
         return result;
@@ -70,7 +59,13 @@ public class LaboratoryService extends BaseService {
         var data = laboratoryDao.selectById(id);
         data.setName(vo.getName());
         data.setNote(vo.getNote());
-        data.setStatus(vo.getStatus());
+        laboratoryDao.updateById(data);
+    }
+
+    public void deleteLaboratory(String id){
+        isLabAvailableEdit(id);
+        var data = laboratoryDao.selectById(id);
+        data.setStatus(BaseColumns.Status.DELETED);
         laboratoryDao.updateById(data);
     }
 

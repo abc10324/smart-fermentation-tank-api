@@ -29,7 +29,7 @@ public class Page<T> {
 
     public Page() {}
 
-    public Page<T> EmptyPage() {
+    public static <T> Page<T> emptyPage() {
         var data = new Page();
         List<T> emptyList = new ArrayList<>();
         data.setRecords(emptyList);
