@@ -33,7 +33,6 @@ public class LaboratoryVO extends BaseColumns {
     @Schema(title = "實驗室人員清單")
     private List<UserVO> memberList;
 
-
     public static LaboratoryVO of(Laboratory data, List<UserVO> memberList) {
         var vo = new LaboratoryVO();
         vo.ownerId = data.getOwnerId();

@@ -30,6 +30,20 @@ public class FermenterVO extends BaseColumns {
     @Schema(title = "醱酵槽狀態")
     private Status status = Status.ACTIVE;
 
+    public static FermenterVO of(Fermenter data) {
+        var vo = new FermenterVO();
+        vo.name = data.getName();
+        vo.laboratoryId = data.getLaboratoryId();
+        vo.status = data.getStatus();
+        vo.connectionStatus = data.getConnectionStatus();
+        vo.macAddress = data.getMacAddress();
+        vo.status = data.getStatus();
+
+        syncBaseColumns(data, vo);
+
+        return vo;
+    }
+
     public Fermenter toFermenter() {
         var data = new Fermenter();
         data.setName(name);
@@ -42,4 +56,5 @@ public class FermenterVO extends BaseColumns {
 
         return data;
     }
+
 }

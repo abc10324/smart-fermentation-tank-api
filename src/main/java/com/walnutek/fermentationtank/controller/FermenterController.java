@@ -3,7 +3,6 @@ package com.walnutek.fermentationtank.controller;
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.service.FermenterService;
 import com.walnutek.fermentationtank.model.vo.FermenterVO;
-import com.walnutek.fermentationtank.model.vo.LaboratoryVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "醱酵槽")
@@ -35,6 +35,15 @@ public class FermenterController {
     public Page<FermenterVO> search(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                     @Parameter(hidden = true) @RequestParam Map<String, Object> paramMap){
         return fermenterService.search(laboratoryId, paramMap);
+    }
+
+    @Operation(summary = "取得所有醱酵槽清單")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @GetMapping("/{laboratoryId}/list")
+    public List<FermenterVO> getFermenterOptionListByLab(
+            @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId
+    ){
+        return fermenterService.list(laboratoryId);
     }
 
     @Operation(summary = "新增醱酵槽")
