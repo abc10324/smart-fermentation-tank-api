@@ -25,7 +25,7 @@ public class LaboratoryController {
 
     @Operation(summary = "取得實驗室清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
-    @Parameter(name = "keyword", schema = @Schema(implementation = String.class), description = "帳號|使用者名稱")
+    @Parameter(name = "keyword", schema = @Schema(implementation = String.class), description = "實驗室名稱")
     @Parameter(name = "page", schema = @Schema(implementation = Integer.class), description = "頁數")
     @Parameter(name = "limit", schema = @Schema(implementation = Integer.class), description = "每頁幾筆")
     @Parameter(name = "orderBy", schema = @Schema(implementation = String.class), description = "排序欄位")
@@ -51,6 +51,16 @@ public class LaboratoryController {
             @PathVariable String laboratoryId,
             @RequestBody LaboratoryVO vo) {
         laboratoryService.updateLaboratory(laboratoryId, vo);
+        return Response.ok();
+    }
+
+    @Operation(summary = "刪除實驗室")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @DeleteMapping("/{laboratoryId}")
+    public Response deleteLaboratory(
+            @Parameter(name = "laboratoryId", description = "實驗室ID")
+            @PathVariable String laboratoryId) {
+        laboratoryService.deleteLaboratory(laboratoryId);
         return Response.ok();
     }
 
