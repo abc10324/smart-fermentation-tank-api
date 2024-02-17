@@ -31,6 +31,7 @@ public class LaboratoryService extends BaseService {
         }
 
         paramMap.put("labList",labList);
+        paramMap.put("status", BaseColumns.Status.ACTIVE);
         result = laboratoryDao.search(paramMap);
         return result;
     }

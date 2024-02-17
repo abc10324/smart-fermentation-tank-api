@@ -5,7 +5,6 @@ import com.walnutek.fermentationtank.config.auth.Auth;
 import com.walnutek.fermentationtank.config.auth.AuthUser;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
-import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.Page;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;

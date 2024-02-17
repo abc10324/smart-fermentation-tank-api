@@ -25,6 +25,7 @@ public class LaboratoryDao extends BaseDao<Laboratory> {
     private QueryCondition getQueryCondition(Map<String,Object> paramMap) {
         var criteriaList = Stream.of(
                         where(hasArray(paramMap.get("labList")), Laboratory::getId).in(paramMap.get("labList")),
+                        where(hasText(paramMap.get("status")), Laboratory::getStatus).in(paramMap.get("status")),
                         where(hasText(paramMap.get("keyword")), Laboratory::getName).like(paramMap.get("keyword"))
                 ).map(CriteriaBuilder::build)
                 .filter(Objects::nonNull)
