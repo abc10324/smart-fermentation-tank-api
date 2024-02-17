@@ -2,6 +2,7 @@ package com.walnutek.fermentationtank.model.dao;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Laboratory;
 import com.walnutek.fermentationtank.model.vo.LaboratoryVO;
 import com.walnutek.fermentationtank.model.vo.Page;
@@ -14,7 +15,12 @@ import static com.walnutek.fermentationtank.model.service.Utils.hasArray;
 @Repository
 public class LaboratoryDao extends BaseDao<Laboratory> {
     public List<Laboratory> selectByOwnerId(String ownerId) {
-        return selectList(List.of(where(Laboratory::getOwnerId).is(ownerId).build()));
+        return selectList(
+                List.of(
+                        where(Laboratory::getStatus).is(BaseColumns.Status.ACTIVE).build(),
+                        where(Laboratory::getOwnerId).is(ownerId).build()
+                )
+        );
     }
 
 
@@ -36,6 +42,4 @@ public class LaboratoryDao extends BaseDao<Laboratory> {
 
         return QueryCondition.of(criteriaList, sort, pageable);
     }
-
-
 }

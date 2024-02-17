@@ -24,7 +24,7 @@ public class LaboratoryService extends BaseService {
         List<String> labList = new ArrayList<>();
         switch (user.getRole()) {
             case LAB_ADMIN -> labList = laboratoryDao.selectByOwnerId(userId).stream().map(BaseColumns::getId).toList();
-            case LAB_USER -> labList = userDao.getLoginUserInfo(userId).getLabList();
+            case LAB_USER -> labList = userDao.userValidCheckAndGetUserInfo(userId).getLabList();
         }
         if(!SUPER_ADMIN.equals(user.getRole()) && labList.isEmpty()){
             return result;

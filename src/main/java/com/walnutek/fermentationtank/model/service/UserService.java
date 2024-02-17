@@ -1,7 +1,6 @@
 package com.walnutek.fermentationtank.model.service;
 
 import com.walnutek.fermentationtank.config.auth.AuthUser;
-import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
@@ -61,23 +60,13 @@ public class UserService extends BaseService {
         }
     }
 
-    private void addLoginCount(String userId) {
-        var user = userDao.selectById(userId);
-        Integer currentCount = user.getLoginCount();
-
-        user.setLoginCount(++currentCount);
-        user.setLastLoginTime(LocalDateTime.now());
-
-        userDao.updateById(user);
-    }
-
     public void updateUser(UserVO vo) {
         updateUser(getLoginUserId(), vo);
 	}
 
     public void updateUser(String id, UserVO vo) {
     	if(isUserExist(id)) {
-    		var data = userDao.selectById(id);
+    		var data = userDao.userValidCheckAndGetUserInfo(id);
 
             if(!Objects.equals(data.getAccount(), vo.getAccount()) && isAccountExist(vo.getAccount())) {
                 throw new AppException(Code.E002, "欲更改的帳號已存在");
@@ -99,8 +88,7 @@ public class UserService extends BaseService {
     }
 
     public void updateUserStatus(String userId, User.Status isActive) {
-        var user = Optional.ofNullable(userDao.selectById(userId))
-                .orElseThrow(() -> new AppException(Code.E004));
+        var user = userDao.userValidCheckAndGetUserInfo(userId);
         user.setStatus(isActive);
         userDao.updateById(user);
     }
@@ -117,20 +105,20 @@ public class UserService extends BaseService {
     public AuthUser UserLoginCheck(String account, String password) {
         var user = Optional.ofNullable(userDao.getUserByAccountAndPassword(account, encryptPassword(password)))
                            .orElseThrow(() -> new AppException(Code.E001));
-        userValidCheck(user.getUserId());
-        addLoginCount(user.getUserId());
+        addLoginCount(user);
 
-        return user;
+        return AuthUser.of(user);
     }
 
     public AuthUser getLoginUserInfo() {
         var userId = getLoginUserId();
-        userValidCheck(userId);
-        return userDao.getLoginUserInfo(userId);
+        var user = userDao.userValidCheckAndGetUserInfo(userId);
+        return AuthUser.of(user);
     }
 
     public UserVO getUserProfile() {
-        var user = getLoginUser();
+        var userId = getLoginUserId();
+        var user = userDao.userValidCheckAndGetUserInfo(userId);
         user.setPassword(null);
         return UserVO.of(user);
 	}
@@ -140,7 +128,7 @@ public class UserService extends BaseService {
 	}
 
     public List<Laboratory> getAvailableLabList(String userId) {
-        var user = userValidCheck(userId);
+        var user = userDao.userValidCheckAndGetUserInfo(userId);
         List<Laboratory> resultList = new ArrayList<>();
         switch (user.getRole()) {
             case SUPER_ADMIN -> laboratoryDao.selectAll().forEach(resultList::add);
@@ -169,6 +157,15 @@ public class UserService extends BaseService {
         return resultList;
     }
 
+    private void addLoginCount(User user) {
+        Integer currentCount = user.getLoginCount();
+
+        user.setLoginCount(++currentCount);
+        user.setLastLoginTime(LocalDateTime.now());
+
+        userDao.updateById(user);
+    }
+
     private boolean isUserExist(String id) {
         return userDao.existById(id);
     }
@@ -179,14 +176,4 @@ public class UserService extends BaseService {
                 .map(cipherService::encrypt)
                 .orElse(password);
     }
-
-    private User userValidCheck(String userId) {
-        var user = userDao.selectById(userId);
-
-        if(User.Status.DELETED.equals(user.getStatus())) {
-            throw new AppException(Code.E001, "帳號已刪除");
-        }
-        return user;
-    }
-
 }

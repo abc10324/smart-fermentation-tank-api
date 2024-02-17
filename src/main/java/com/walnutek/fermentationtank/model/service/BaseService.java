@@ -32,8 +32,12 @@ public class BaseService {
     }
 
     protected User getLoginUser(){
-        return Optional.ofNullable(userDao.selectById(getLoginUserId()))
+        var user = Optional.ofNullable(userDao.selectById(getLoginUserId()))
                 .orElseThrow(() -> new AppException(AppException.Code.E004));
+        if(User.Status.DELETED.equals(user.getStatus())) {
+            throw new AppException(AppException.Code.E001, "帳號已刪除");
+        }
+        return user;
     }
 
     protected List<String> getUserLabList(){
@@ -48,7 +52,7 @@ public class BaseService {
                 labList = laboratoryDao.selectByOwnerId(userId).stream().map(BaseColumns::getId).toList();
             }
             case LAB_USER -> {
-                labList = userDao.getLoginUserInfo(userId).getLabList();
+                labList = userDao.userValidCheckAndGetUserInfo(userId).getLabList();
             }
         }
         return labList;

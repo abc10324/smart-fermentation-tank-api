@@ -1,9 +1,9 @@
 package com.walnutek.fermentationtank.model.dao;
 
 import com.walnutek.fermentationtank.config.auth.Auth;
-import com.walnutek.fermentationtank.config.auth.AuthUser;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
-import com.walnutek.fermentationtank.config.mongo.UpdateBuilder;
+import com.walnutek.fermentationtank.exception.AppException;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.UserVO;
@@ -35,6 +35,7 @@ public class UserDao extends BaseDao<User> {
         var loginUser = Auth.getAuthUser();
         var criteriaList = Stream.of(
                 where(User::getRole).ne(User.Role.SUPER_ADMIN),
+                where(User::getStatus).is(BaseColumns.Status.ACTIVE),
                 where(User.Role.LAB_ADMIN.equals(loginUser.getRole()), User::getRole).is(User.Role.LAB_USER),
                 where(hasText(paramMap.get("keyword")), UserVO::getAccount).like(paramMap.get("keyword"))
                         .or(where(UserVO::getName).like(paramMap.get("keyword")))
@@ -65,27 +66,21 @@ public class UserDao extends BaseDao<User> {
         return template.exists(query, User.class);
     }
 
-    public AuthUser getUserByAccountAndPassword(String account, String password) {
+    public User getUserByAccountAndPassword(String account, String password) {
         var query = new Query();
         query.addCriteria(where(User::getAccount).is(account).build());
         query.addCriteria(where(User::getPassword).is(password).build());
+        query.addCriteria(where(User::getStatus).is(BaseColumns.Status.ACTIVE).build());
 
-        return Optional.ofNullable(template.findOne(query, User.class))
-                       .map(AuthUser::of)
-                       .orElse(null);
+        return template.findOne(query, User.class);
     }
 
-    public AuthUser getLoginUserInfo(String userId) {
-        return Optional.ofNullable(selectById(userId))
-                       .map(AuthUser::of)
-                       .orElse(null);
+    public User userValidCheckAndGetUserInfo(String userId) {
+        var user = Optional.ofNullable(selectById(userId))
+                .orElseThrow(() -> new AppException(AppException.Code.E004));
+        if(User.Status.DELETED.equals(user.getStatus())) {
+            throw new AppException(AppException.Code.E001, "帳號已刪除");
+        }
+        return user;
     }
-
-    public void addLoginCount(String userId) {
-    	var update = UpdateBuilder.newInstance()
-    					.inc(User::getLoginCount, 1)
-    					.build();
-        updateById(userId, update);
-    }
-
 }

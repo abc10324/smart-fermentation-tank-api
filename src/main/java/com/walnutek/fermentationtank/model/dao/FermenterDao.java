@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.dao;
 
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Fermenter;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.FermenterVO;
@@ -25,6 +26,7 @@ public class FermenterDao extends BaseDao<Fermenter> {
     public Page<FermenterVO> search(String laboratoryId, Map<String, Object> paramMap){
         List<CriteriaBuilder> criteriaList = new ArrayList<>();
         criteriaList.add(where(Fermenter::getLaboratoryId).is(laboratoryId));
+        criteriaList.add(where(Fermenter::getStatus).is(BaseColumns.Status.ACTIVE));
         var keyword = paramMap.get("keyword");
         if(hasText(keyword)){
             criteriaList.add(where(FermenterVO::getName).like(keyword));

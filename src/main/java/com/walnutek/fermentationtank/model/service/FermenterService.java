@@ -28,6 +28,7 @@ public class FermenterService extends BaseService {
     private FermenterDao fermenterDao;
 
     public Page<FermenterVO> search(String laboratoryId, Map<String, Object> paramMap) {
+        paramMap.put("status", BaseColumns.Status.ACTIVE);
         var resultPage = fermenterDao.search(laboratoryId, paramMap);
         var lab = laboratoryDao.selectById(laboratoryId);
         resultPage.getRecords().stream().forEach(fermenter -> fermenter.setLaboratory(lab.getName()));
