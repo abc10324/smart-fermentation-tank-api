@@ -61,7 +61,6 @@ public class UserService extends BaseService {
         }
     }
 
-
     public void updateUser(UserVO vo) {
         updateUser(getLoginUserId(), vo);
 	}

@@ -5,11 +5,13 @@ import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.config.auth.AuthUser;
 import com.walnutek.fermentationtank.config.auth.HasRole;
 import com.walnutek.fermentationtank.config.auth.JwtService;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.UserService;
 import com.walnutek.fermentationtank.model.vo.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.DependentSchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -103,6 +105,15 @@ public class UserController {
     @PutMapping("/changePassword")
     public Response changePassword(@RequestBody ChangePasswordPayload paylaod) {
         userService.updateUserPassword(paylaod.getOldPassword(), paylaod.getNewPassword());
+        return Response.ok();
+    }
+
+    @Operation(summary = "刪除使用者", description = "刪除該使用者")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @DeleteMapping("/{userId}")
+    public Response deleteUser(@Parameter(name = "userId", description = "使用者ID")
+                               @PathVariable String userId){
+        userService.updateUserStatus(userId, User.Status.DELETED);
         return Response.ok();
     }
 
