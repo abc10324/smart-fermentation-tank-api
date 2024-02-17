@@ -1,25 +1,20 @@
 package com.walnutek.fermentationtank.model.service;
 
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
-import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
 import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
 import com.walnutek.fermentationtank.model.entity.Alert;
 import com.walnutek.fermentationtank.model.entity.AlertRecord;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
-import com.walnutek.fermentationtank.model.entity.User;
-import com.walnutek.fermentationtank.model.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
-import static com.walnutek.fermentationtank.model.service.Utils.hasArray;
 import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 
 @Service
