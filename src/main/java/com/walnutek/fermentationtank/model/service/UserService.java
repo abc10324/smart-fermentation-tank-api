@@ -61,6 +61,16 @@ public class UserService extends BaseService {
         }
     }
 
+    private void addLoginCount(String userId) {
+        var user = userDao.selectById(userId);
+        Integer currentCount = user.getLoginCount();
+
+        user.setLoginCount(++currentCount);
+        user.setLastLoginTime(LocalDateTime.now());
+
+        userDao.updateById(user);
+    }
+
     public void updateUser(UserVO vo) {
         updateUser(getLoginUserId(), vo);
 	}
@@ -88,15 +98,20 @@ public class UserService extends BaseService {
     	}
     }
 
-    private boolean isUserExist(String id) {
-    	return userDao.existById(id);
+    public void updateUserStatus(String userId, User.Status isActive) {
+        var user = Optional.ofNullable(userDao.selectById(userId))
+                .orElseThrow(() -> new AppException(Code.E004));
+        user.setStatus(isActive);
+        userDao.updateById(user);
     }
 
-    private String encryptPassword(String password){
-        return Optional.ofNullable(password)
-                .filter(StringUtils::hasText)
-                .map(cipherService::encrypt)
-                .orElse(password);
+    public void updateUserPassword(String oldPassword, String newPassword) {
+        var user = getLoginUser();
+        if(!user.getPassword().equals(encryptPassword(oldPassword))) {
+            throw new AppException(Code.E006);
+        }
+        user.setPassword(encryptPassword(newPassword));
+        userDao.updateById(user);
     }
 
     public AuthUser UserLoginCheck(String account, String password) {
@@ -114,54 +129,19 @@ public class UserService extends BaseService {
         return userDao.getLoginUserInfo(userId);
     }
 
-    private void addLoginCount(String userId) {
-        var user = userDao.selectById(userId);
-        Integer currentCount = user.getLoginCount();
-
-        user.setLoginCount(++currentCount);
-        user.setLastLoginTime(LocalDateTime.now());
-
-        userDao.updateById(user);
-    }
-
-    private void userValidCheck(String userId) {
-        var user = userDao.selectById(userId);
-
-        if(User.Status.DELETED.equals(user.getStatus())) {
-            throw new AppException(Code.E001, "帳號已刪除");
-        }
-    }
-
     public UserVO getUserProfile() {
         var user = getLoginUser();
         user.setPassword(null);
         return UserVO.of(user);
 	}
 
-    public void updateUserStatus(String userId, User.Status isActive) {
-        var user = Optional.ofNullable(userDao.selectById(userId))
-                           .orElseThrow(() -> new AppException(Code.E004));
-        user.setStatus(isActive);
-        userDao.updateById(user);
-    }
-
     public boolean isAccountExist(String account) {
         return userDao.isAccountExist(account);
 	}
 
-	public void updateUserPassword(String oldPassword, String newPassword) {
-        var user = getLoginUser();
-        if(!user.getPassword().equals(encryptPassword(oldPassword))) {
-			throw new AppException(Code.E006);
-		}
-		user.setPassword(encryptPassword(newPassword));
-		userDao.updateById(user);
-	}
-
     public List<Laboratory> getAvailableLabList(String userId) {
-        var user = getLoginUser();
+        var user = userValidCheck(userId);
         List<Laboratory> resultList = new ArrayList<>();
-
         switch (user.getRole()) {
             case SUPER_ADMIN -> laboratoryDao.selectAll().forEach(resultList::add);
             case LAB_ADMIN -> laboratoryDao.selectByOwnerId(userId).forEach(resultList::add);
@@ -187,6 +167,26 @@ public class UserService extends BaseService {
                                 .ifPresent(resultList::addAll);
         }
         return resultList;
+    }
+
+    private boolean isUserExist(String id) {
+        return userDao.existById(id);
+    }
+
+    private String encryptPassword(String password){
+        return Optional.ofNullable(password)
+                .filter(StringUtils::hasText)
+                .map(cipherService::encrypt)
+                .orElse(password);
+    }
+
+    private User userValidCheck(String userId) {
+        var user = userDao.selectById(userId);
+
+        if(User.Status.DELETED.equals(user.getStatus())) {
+            throw new AppException(Code.E001, "帳號已刪除");
+        }
+        return user;
     }
 
 }
