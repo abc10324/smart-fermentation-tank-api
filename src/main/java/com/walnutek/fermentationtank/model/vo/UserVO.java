@@ -55,19 +55,13 @@ public class UserVO extends BaseColumns {
     @Schema(title = "最後登入時間", accessMode = Schema.AccessMode.READ_ONLY)
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm")
     private LocalDateTime lastLoginTime;
-    
+
     @Schema(title = "帳號狀態名稱", accessMode = Schema.AccessMode.READ_ONLY)
     public String getStatusName(){
         return Optional.ofNullable(status)
                 .map(User.Status::getName)
                 .orElse("未定義");
     }
-
-//    public List<String> getLabIdList() {
-//        return Objects.nonNull(labList) ?
-//                labList.stream().map(Laboratory::getId).toList() :
-//                labIdList;
-//    }
 
     public static UserVO of(User data) {
         var vo = new UserVO();
@@ -100,7 +94,7 @@ public class UserVO extends BaseColumns {
 
         return data;
     }
-    
+
     @JsonIgnore
     public static List<AggregationOperation> getLookupAggregation() {
     	List<AggregationOperation> aggregationList = new ArrayList<>();
@@ -119,5 +113,5 @@ public class UserVO extends BaseColumns {
                 .mapping(Laboratory::getName, UserVO::getLabNameList)
                 .build();
     }
-    
+
 }

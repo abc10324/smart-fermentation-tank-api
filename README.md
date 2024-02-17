@@ -1,5 +1,5 @@
 # smart-fermentation-tank-api
-### 智慧發酵槽API
+### 智慧醱酵槽API
 
 **語言**: Java 17  
 **框架**: Spring Boot 3.2.1

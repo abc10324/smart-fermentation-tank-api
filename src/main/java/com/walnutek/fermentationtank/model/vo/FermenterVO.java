@@ -30,9 +30,10 @@ public class FermenterVO extends BaseColumns {
     @Schema(title = "醱酵槽狀態")
     private Status status = Status.ACTIVE;
 
-    public static FermenterVO of(Fermenter data) {
+    public static FermenterVO of(Fermenter data, String labName) {
         var vo = new FermenterVO();
         vo.name = data.getName();
+        vo.laboratory = labName;
         vo.laboratoryId = data.getLaboratoryId();
         vo.status = data.getStatus();
         vo.connectionStatus = data.getConnectionStatus();

@@ -251,6 +251,14 @@ public abstract class BaseDao<T extends BaseColumns> {
         }
     }
 
+    public long count(List<Criteria> criteriaList) {
+        var query = new Query();
+        criteriaList.forEach(query::addCriteria);
+
+        return template.count(query, TYPE_REF);
+    }
+
+
     private <O> List<AggregationOperation> getLookupAggregation(Class<O> target) {
     	List<AggregationOperation> aggregationList = new ArrayList<>();
 

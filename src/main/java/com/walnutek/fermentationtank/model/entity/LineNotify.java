@@ -5,6 +5,8 @@ import com.walnutek.fermentationtank.config.Const;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 /**
  * LineNotify
@@ -15,6 +17,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @EqualsAndHashCode(callSuper = false)
 @Document(Const.COLLECTION_LINE_NOTIFY)
 public class LineNotify extends BaseColumns {
+
+    /**
+     * 場域(實驗室Id)
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String laboratoryId;
 
     /**
      * LineId

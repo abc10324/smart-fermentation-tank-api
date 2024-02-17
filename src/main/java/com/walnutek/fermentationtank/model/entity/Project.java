@@ -21,6 +21,12 @@ import java.time.LocalDateTime;
 public class Project extends BaseColumns {
 
     /**
+     * 場域(實驗室Id)
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String laboratoryId;
+
+    /**
      * 目標裝置ID
      */
     @Field(targetType = FieldType.OBJECT_ID)

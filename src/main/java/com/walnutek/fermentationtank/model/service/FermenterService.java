@@ -2,6 +2,7 @@ package com.walnutek.fermentationtank.model.service;
 
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.FermenterDao;
+import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Fermenter;
 import com.walnutek.fermentationtank.model.entity.User;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 
@@ -27,20 +29,8 @@ public class FermenterService extends BaseService {
     @Autowired
     private FermenterDao fermenterDao;
 
-    public Page<FermenterVO> search(String laboratoryId, Map<String, Object> paramMap) {
-        paramMap.put("status", BaseColumns.Status.ACTIVE);
-        var resultPage = fermenterDao.search(laboratoryId, paramMap);
-        var lab = laboratoryDao.selectById(laboratoryId);
-        resultPage.getRecords().stream().forEach(fermenter -> fermenter.setLaboratory(lab.getName()));
-        return resultPage;
-    }
-
-    public List<FermenterVO> list(String laboratoryId) {
-        var query = List.of(
-                where(Fermenter::getLaboratoryId).is(laboratoryId).build(),
-                where(Fermenter::getStatus).is(Status.ACTIVE).build());
-        return fermenterDao.selectList(query).stream().map(FermenterVO::of).toList();
-    }
+    @Autowired
+    private LaboratoryDao laboratoryDao;
 
     public String createFermenter(String laboratoryId, FermenterVO vo) {
         var user = getLoginUser();
@@ -62,6 +52,13 @@ public class FermenterService extends BaseService {
         }
     }
 
+    public void deleteFermenter(String laboratoryId, String fermenterId){
+        isFermenterAvailableEdit(laboratoryId, fermenterId);
+        var data = fermenterDao.selectById(fermenterId);
+        data.setStatus(BaseColumns.Status.DELETED);
+        fermenterDao.updateById(data);
+    }
+
     public void updateFermenter(String laboratoryId, String fermenterId, FermenterVO vo) {
         isFermenterAvailableEdit(laboratoryId, fermenterId);
         var data = fermenterDao.selectById(fermenterId);
@@ -72,11 +69,28 @@ public class FermenterService extends BaseService {
         fermenterDao.updateById(data);
     }
 
-    public void deleteFermenter(String laboratoryId, String fermenterId){
-        isFermenterAvailableEdit(laboratoryId, fermenterId);
-        var data = fermenterDao.selectById(fermenterId);
-        data.setStatus(BaseColumns.Status.DELETED);
-        fermenterDao.updateById(data);
+    public Page<FermenterVO> search(String laboratoryId, Map<String, Object> paramMap) {
+        var resultPage = fermenterDao.search(laboratoryId, paramMap);
+        var lab = laboratoryDao.selectById(laboratoryId);
+        resultPage.getRecords().stream().forEach(fermenter -> fermenter.setLaboratory(lab.getName()));
+        return resultPage;
+    }
+
+    public List<FermenterVO> list(String laboratoryId) {
+        var laboratory = Optional.ofNullable(laboratoryDao.selectById(laboratoryId))
+                .orElseThrow(() -> new AppException(AppException.Code.E004));
+        var labName = laboratory.getName();
+        var query = List.of(
+                where(Fermenter::getLaboratoryId).is(laboratoryId).build(),
+                where(Fermenter::getStatus).is(Status.ACTIVE).build());
+        return fermenterDao.selectList(query).stream().map(fermenter -> FermenterVO.of(fermenter, labName)).toList();
+    }
+
+    public Integer countFermenterNum(String laboratoryId){
+        var query = List.of(
+                where(Fermenter::getLaboratoryId).is(laboratoryId).build(),
+                where(Fermenter::getStatus).is(Status.ACTIVE).build());
+        return Math.toIntExact(fermenterDao.count(query));
     }
 
     private void isFermenterAvailableEdit(String laboratoryId, String fermenterId) {

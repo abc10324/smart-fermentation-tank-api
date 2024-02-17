@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.service;
 
 import com.walnutek.fermentationtank.config.auth.AuthUser;
+import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
@@ -15,6 +16,11 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
+
+import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static com.walnutek.fermentationtank.model.service.Utils.hasArray;
+import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 
 @Service
 @Transactional
@@ -25,10 +31,6 @@ public class UserService extends BaseService {
 
     @Autowired
     private CipherService cipherService;
-
-    public Page<UserVO> search(Map<String, Object> paramMap) {
-        return userDao.search(paramMap);
-    }
 
     public String createUser(UserVO vo) {
         var user = getLoginUser();
@@ -102,6 +104,10 @@ public class UserService extends BaseService {
         userDao.updateById(user);
     }
 
+    public Page<UserVO> search(Map<String, Object> paramMap) {
+        return userDao.search(paramMap);
+    }
+
     public AuthUser UserLoginCheck(String account, String password) {
         var user = Optional.ofNullable(userDao.getUserByAccountAndPassword(account, encryptPassword(password)))
                            .orElseThrow(() -> new AppException(Code.E001));
@@ -155,6 +161,25 @@ public class UserService extends BaseService {
                                 .ifPresent(resultList::addAll);
         }
         return resultList;
+    }
+
+    public Integer countUserNum(Map<String, Object> paramMap){
+        System.out.println(paramMap);
+        var query = Stream.of(
+                where(hasText(paramMap.get("adminId")), User::getAdminId).is(paramMap.get("adminId")),
+                where(hasText(paramMap.get("role")), User::getRole).is(paramMap.get("role")),
+                where(hasText(paramMap.get("name")), User::getName).like(paramMap.get("name")),
+                where(hasText(paramMap.get("email")), User::getEmail).like(paramMap.get("email")),
+                where(hasArray(paramMap.get("labList")), User::getLabList).in(paramMap.get("labList")),
+                where(hasText(paramMap.get("status")), User::getStatus).is(paramMap.get("status"))
+        ).map(CriteriaBuilder::build)
+                .filter(Objects::nonNull)
+                .toList();
+        query.forEach(data -> {
+            System.out.println(data.getCriteriaObject());
+        });
+//        System.out.println(query);
+        return Math.toIntExact(userDao.count(query));
     }
 
     private void addLoginCount(User user) {

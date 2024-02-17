@@ -18,6 +18,12 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 public class Alert extends BaseColumns {
 
     /**
+     * 場域(實驗室Id)
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String laboratoryId;
+
+    /**
      * 警報名稱
      */
     private String name;

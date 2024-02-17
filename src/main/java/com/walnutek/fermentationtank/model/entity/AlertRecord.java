@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Document(Const.COLLECTION_ALERT_RECORD)
-public class AlertRecord {
+public class AlertRecord extends BaseColumns {
 
     /**
      * 警報Id

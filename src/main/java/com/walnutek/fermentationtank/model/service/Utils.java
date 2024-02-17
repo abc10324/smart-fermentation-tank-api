@@ -12,6 +12,7 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -27,10 +28,12 @@ public class Utils {
 
 	public static Boolean hasArray(Object value) {
 		var result = false;
-		if (value.getClass().isArray()) {
-			var list = Arrays.asList((Object[])value);
-			if(!list.isEmpty()){
-				result = true;
+		if(value!= null){
+			if (value.getClass().isArray()) {
+				var list = Arrays.asList((Object[])value);
+				if(!list.isEmpty()){
+					result = true;
+				}
 			}
 		}
 		return result;

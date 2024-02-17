@@ -653,7 +653,7 @@ public class CriteriaBuilder {
 	public Criteria build() {
 		return needBuild ?
 				chainByOr ? orBuild() : criteria :
-				new Criteria();
+				null;
 	}
 
 	private Criteria orBuild() {
