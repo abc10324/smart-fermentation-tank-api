@@ -74,7 +74,7 @@ if(adminWorkdir.exists()){
 
 	task adminBuild(type: PnpmTask) {
 		dependsOn adminInstall
-		args = ["build","--outDir","../${rootProject.name}/src/main/resources/static/backend"]
+		args = ["build","--outDir","../${rootProject.name}/src/main/resources/static"]
 	}
 
 	adminBuild.shouldRunAfter clean
