@@ -1,7 +1,6 @@
 package com.walnutek.fermentationtank.model.service;
 
 import com.walnutek.fermentationtank.config.auth.AuthUser;
-import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
@@ -18,11 +17,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
-import static com.walnutek.fermentationtank.model.service.Utils.hasArray;
-import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 
 @Service
 @Transactional
@@ -201,23 +197,7 @@ public class UserService extends BaseService {
     }
 
     private List<String> getLabNameList(Map<String,String> userLabMap, List<String> userLabList){
-//        var resultList = new ArrayList<String>();
         return userLabList.stream().map(userLabMap::get).toList();
-//        return resultList
-    }
-
-    public Integer countUserNum(Map<String, Object> paramMap){
-        var query = Stream.of(
-                where(hasText(paramMap.get("adminId")), User::getAdminId).is(paramMap.get("adminId")),
-                where(hasText(paramMap.get("role")), User::getRole).is(paramMap.get("role")),
-                where(hasText(paramMap.get("name")), User::getName).like(paramMap.get("name")),
-                where(hasText(paramMap.get("email")), User::getEmail).like(paramMap.get("email")),
-                where(hasArray(paramMap.get("labList")), User::getLabList).in(paramMap.get("labList")),
-                where(hasText(paramMap.get("status")), User::getStatus).is(paramMap.get("status"))
-        ).map(CriteriaBuilder::build)
-                .filter(Objects::nonNull)
-                .toList();
-        return Math.toIntExact(userDao.count(query));
     }
 
     private void addLoginCount(User user) {

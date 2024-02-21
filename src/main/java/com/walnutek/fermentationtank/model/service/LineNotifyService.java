@@ -51,19 +51,4 @@ public class LineNotifyService {
         }
         return resulList;
     }
-
-    public Integer countLineNotifyNum(String laboratoryId){
-        var query = List.of(
-                where(LineNotify::getLaboratoryId).is(laboratoryId).build(),
-                where(LineNotify::getStatus).is(BaseColumns.Status.ACTIVE).build());
-        return Math.toIntExact(lineNotifyDao.count(query));
-    }
-
-    public Integer countLineNotifyNum(List<String> userLabList){
-        var query = List.of(
-                where(LineNotify::getLaboratoryId).in(userLabList).build(),
-                where(LineNotify::getStatus).is(BaseColumns.Status.ACTIVE).build());
-        return Math.toIntExact(lineNotifyDao.count(query));
-    }
-
 }

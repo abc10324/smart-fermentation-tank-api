@@ -4,13 +4,12 @@ import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.FermenterDao;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
+import com.walnutek.fermentationtank.model.entity.BaseColumns.Status;
 import com.walnutek.fermentationtank.model.entity.Fermenter;
-import com.walnutek.fermentationtank.model.entity.Laboratory;
+import com.walnutek.fermentationtank.model.entity.Fermenter.ConnectionStatus;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.FermenterVO;
-import com.walnutek.fermentationtank.model.entity.Fermenter.ConnectionStatus;
-import com.walnutek.fermentationtank.model.entity.BaseColumns.Status;
 import com.walnutek.fermentationtank.model.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -87,24 +86,6 @@ public class FermenterService extends BaseService {
         return fermenterDao.selectList(query).stream().map(fermenter -> FermenterVO.of(fermenter, labName)).toList();
     }
 
-//    public Map<String, List<FermenterVO>> listAllGroupByLaboratoryId(
-//            List<String> userLabList, Map<String,String> userLabMap){
-//        var fermenterQuery = List.of(
-//                where(Fermenter::getLaboratoryId).in(userLabList).build(),
-//                where(Fermenter::getStatus).is(Status.ACTIVE).build()
-//        );
-//        Map<String, List<Fermenter>> map = fermenterDao.selectList(fermenterQuery).stream()
-//                .collect(groupingBy(Fermenter::getLaboratoryId));
-//        var resultMap = new HashMap<String, List<FermenterVO>>();
-//        for (String laboratoryId : map.keySet()) {
-//            if(userLabMap.containsKey(laboratoryId)){
-//                var laboratoryName = userLabMap.get(laboratoryId);
-//                var fermenterList = map.get(laboratoryId).stream().map(fermenter -> FermenterVO.of(fermenter, laboratoryName)).toList();
-//                resultMap.put(laboratoryName, fermenterList);
-//            }
-//        }
-//        return resultMap;
-//    }
     public List<DashboardDataVO> listAllGroupByLaboratoryId(
             List<String> userLabList, Map<String,String> userLabMap){
         var fermenterQuery = List.of(
@@ -133,19 +114,6 @@ public class FermenterService extends BaseService {
         return fermenterDao.selectList(criteriaList);
     }
 
-    public Integer countFermenterNum(String laboratoryId){
-        var query = List.of(
-                where(Fermenter::getLaboratoryId).is(laboratoryId).build(),
-                where(Fermenter::getStatus).is(Status.ACTIVE).build());
-        return Math.toIntExact(fermenterDao.count(query));
-    }
-
-    public Integer countFermenterNum(List<String> userLabList){
-        var query = List.of(
-                where(Fermenter::getLaboratoryId).in(userLabList).build(),
-                where(Fermenter::getStatus).is(Status.ACTIVE).build());
-        return Math.toIntExact(fermenterDao.count(query));
-    }
     private void isFermenterAvailableEdit(String laboratoryId, String fermenterId) {
         var fermenter = fermenterDao.selectByIdAndStatus(fermenterId, BaseColumns.Status.ACTIVE);
         if(Objects.isNull(fermenter)){

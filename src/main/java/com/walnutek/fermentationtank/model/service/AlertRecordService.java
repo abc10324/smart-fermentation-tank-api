@@ -89,42 +89,4 @@ public class AlertRecordService {
         }
         return resulList;
     }
-
-    public Integer countAlertRecordNum(List<String> userLabList, Map<String, Object> paramMap){
-        var alertQuery = Stream.of(
-                        where(Alert::getLaboratoryId).in(userLabList),
-                        where(Alert::getStatus).is(BaseColumns.Status.ACTIVE),
-                        where(hasText(paramMap.get("keyword")), Alert::getName).like(paramMap.get("keyword"))
-                                .or(where(Alert::getCheckField).like(paramMap.get("keyword")))
-                ).map(CriteriaBuilder::build)
-                .filter(Objects::nonNull)
-                .toList();
-        var alertIdList = alertDao.selectList(alertQuery).stream().map(BaseColumns::getId).toList();
-        var alertRecordQuery = Stream.of(
-                        where(AlertRecord::getAlertId).in(alertIdList),
-                        where(hasText(paramMap.get("state")), AlertRecord::getState).is(paramMap.get("state"))
-                ).map(CriteriaBuilder::build)
-                .filter(Objects::nonNull)
-                .toList();
-        return Math.toIntExact(alertRecordDao.count(alertRecordQuery));
-    }
-
-    public Integer countAlertRecordNum(String laboratoryId, Map<String, Object> paramMap){
-        var alertQuery = Stream.of(
-                        where(Alert::getLaboratoryId).is(laboratoryId),
-                        where(Alert::getStatus).is(BaseColumns.Status.ACTIVE),
-                        where(hasText(paramMap.get("keyword")), Alert::getName).like(paramMap.get("keyword"))
-                                .or(where(Alert::getCheckField).like(paramMap.get("keyword")))
-                ).map(CriteriaBuilder::build)
-                .filter(Objects::nonNull)
-                .toList();
-        var alertIdList = alertDao.selectList(alertQuery).stream().map(BaseColumns::getId).toList();
-        var alertRecordQuery = Stream.of(
-                where(AlertRecord::getAlertId).in(alertIdList),
-                        where(hasText(paramMap.get("state")), AlertRecord::getState).is(paramMap.get("state"))
-                ).map(CriteriaBuilder::build)
-                .filter(Objects::nonNull)
-                .toList();
-        return Math.toIntExact(alertRecordDao.count(alertRecordQuery));
-    }
 }
