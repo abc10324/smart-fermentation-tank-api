@@ -5,8 +5,10 @@ import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Laboratory;
 import com.walnutek.fermentationtank.model.entity.User;
+import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,8 +165,48 @@ public class UserService extends BaseService {
         return resultList;
     }
 
+    public List<DashboardDataVO> listAllGroupByLaboratoryId(
+            List<String> userLabList,
+            Map<String,String> userLabMap
+    ){
+        var userQuery = List.of(
+                where(User::getLabList).in(userLabList).build(),
+                where(User::getStatus).is(BaseColumns.Status.ACTIVE).build()
+        );
+        var list = userDao.selectList(userQuery);
+        var resulList = new ArrayList<DashboardDataVO>();
+        userLabList.forEach(laboratoryId ->{
+            var vo = new DashboardDataVO();
+            var laboratoryName = userLabMap.get(laboratoryId);
+            vo.laboratory = laboratoryName;
+            vo.laboratoryId = laboratoryId;
+            var dataList = new ArrayList<UserVO>();
+            list.forEach(user -> {
+                if(user.getLabList().contains(laboratoryId)){
+                    var userVO = new UserVO();
+                    userVO.setRole(user.getRole());
+                    userVO.setAccount(user.getAccount());
+                    userVO.setName(user.getName());
+                    userVO.setEmail(user.getEmail());
+                    userVO.setLabList(user.getLabList());
+                    userVO.setLabNameList(getLabNameList(userLabMap, user.getLabList()));
+                    dataList.add(userVO);
+                }
+            });
+            vo.total = dataList.size();
+            vo.data = dataList;
+            resulList.add(vo);
+        });
+        return resulList;
+    }
+
+    private List<String> getLabNameList(Map<String,String> userLabMap, List<String> userLabList){
+//        var resultList = new ArrayList<String>();
+        return userLabList.stream().map(userLabMap::get).toList();
+//        return resultList
+    }
+
     public Integer countUserNum(Map<String, Object> paramMap){
-        System.out.println(paramMap);
         var query = Stream.of(
                 where(hasText(paramMap.get("adminId")), User::getAdminId).is(paramMap.get("adminId")),
                 where(hasText(paramMap.get("role")), User::getRole).is(paramMap.get("role")),
@@ -175,10 +217,6 @@ public class UserService extends BaseService {
         ).map(CriteriaBuilder::build)
                 .filter(Objects::nonNull)
                 .toList();
-        query.forEach(data -> {
-            System.out.println(data.getCriteriaObject());
-        });
-//        System.out.println(query);
         return Math.toIntExact(userDao.count(query));
     }
 

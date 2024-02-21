@@ -23,7 +23,6 @@ public class LaboratoryDao extends BaseDao<Laboratory> {
         );
     }
 
-
     public Page<LaboratoryVO> search(Map<String, Object> paramMap){
         return aggregationSearch(getQueryCondition(paramMap), LaboratoryVO.class);
     }

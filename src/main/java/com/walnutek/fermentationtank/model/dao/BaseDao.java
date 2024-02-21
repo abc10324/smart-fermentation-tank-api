@@ -89,7 +89,6 @@ public abstract class BaseDao<T extends BaseColumns> {
     public List<T> selectList(List<Criteria> criteriaList) {
         var query = new Query();
         criteriaList.forEach(query::addCriteria);
-
         return template.find(query, TYPE_REF);
     }
 
@@ -136,6 +135,18 @@ public abstract class BaseDao<T extends BaseColumns> {
                 resultList,
                 validPageable,
                 () -> totalCount));
+    }
+
+    public <T, O> List<O> aggregationSelectList(QueryCondition condition, Class<T> from, Class<O> to) {
+        List<AggregationOperation> aggregationList = new ArrayList<>();
+        aggregationList.addAll(getLookupAggregation(to));
+        condition.criteriaList
+                .stream()
+                .map(Aggregation::match)
+                .forEach(aggregationList::add);
+
+        return template.aggregate(newAggregation(from, aggregationList), to)
+                .getMappedResults();
     }
 
     protected Pageable getValidPageable(Pageable pageable) {

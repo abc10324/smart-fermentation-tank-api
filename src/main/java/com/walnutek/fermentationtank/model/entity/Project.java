@@ -33,6 +33,11 @@ public class Project extends BaseColumns {
     private String fermenterId;
 
     /**
+     * 專案名稱
+     */
+    private String name;
+
+    /**
      * 起始時間
      */
     @JsonFormat(pattern = "yyyy/MM/dd HH:mm")
