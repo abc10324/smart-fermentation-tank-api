@@ -1,12 +1,17 @@
 package com.walnutek.fermentationtank.model.service;
 
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
+import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
 import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
 import com.walnutek.fermentationtank.model.dao.DeviceDao;
-import com.walnutek.fermentationtank.model.entity.*;
-import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
+import com.walnutek.fermentationtank.model.entity.Alert;
+import com.walnutek.fermentationtank.model.entity.AlertRecord;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
+import com.walnutek.fermentationtank.model.entity.Device;
 import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
+import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
+import com.walnutek.fermentationtank.model.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +30,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @Transactional
-public class AlertRecordService {
+public class AlertRecordService extends BaseService {
 
     @Autowired
     private AlertDao alertDao;
@@ -35,6 +40,18 @@ public class AlertRecordService {
 
     @Autowired
     private DeviceDao deviceDao;
+
+    public void updateAlertRecord(String laboratoryId, String alertRecordId, AlertRecordVO vo) {
+        isAlertRecordAvailableEdit(laboratoryId, alertRecordId);
+        var data = alertRecordDao.selectById(alertRecordId);
+        data.setNote(vo.getNote());
+        data.setState(vo.getState());
+        alertRecordDao.updateById(data);
+    }
+
+    public Page<AlertRecordVO> search(String laboratoryId, Map<String, Object> paramMap) {
+        return alertRecordDao.search(laboratoryId, paramMap);
+    }
 
     public List<DashboardDataVO> listAllGroupByLaboratoryId(
             List<String> userLabList,
@@ -88,5 +105,19 @@ public class AlertRecordService {
             }
         }
         return resulList;
+    }
+
+    private void isAlertRecordAvailableEdit(String laboratoryId, String alertRecordId){
+        checkUserIsBelongToLaboratory(laboratoryId);
+        var query = Stream.of(
+                        where(AlertRecord::getId).is(alertRecordId),
+                        where(AlertRecord::getState).is(AlertRecord.AlertState.ISSUE)
+                ).map(CriteriaBuilder::build)
+                .filter(Objects::nonNull)
+                .toList();
+        var alertRecord = alertRecordDao.selectOne(query);
+        if(Objects.isNull(alertRecord)){
+            throw new AppException(AppException.Code.E002, "無法更新不存在的警報紀錄");
+        }
     }
 }

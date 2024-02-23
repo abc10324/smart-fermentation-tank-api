@@ -2,6 +2,7 @@ package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -60,3 +61,4 @@ public class Alert extends BaseColumns {
      */
     private Status status = Status.ACTIVE;
 }
+

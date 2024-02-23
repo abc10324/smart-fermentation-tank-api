@@ -1,5 +1,6 @@
 package com.walnutek.fermentationtank.model.dao;
 
+import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.config.auth.Auth;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
@@ -37,9 +38,9 @@ public class UserDao extends BaseDao<User> {
                 where(User::getRole).ne(User.Role.SUPER_ADMIN),
                 where(User::getStatus).is(BaseColumns.Status.ACTIVE),
                 where(User.Role.LAB_ADMIN.equals(loginUser.getRole()), User::getRole).is(User.Role.LAB_USER),
-                where(hasText(paramMap.get("keyword")), UserVO::getAccount).like(paramMap.get("keyword"))
-                        .or(where(UserVO::getName).like(paramMap.get("keyword")))
-                        .or(where(UserVO::getEmail).like(paramMap.get("keyword")))
+                where(hasText(paramMap.get(Const.KEYWORD)), UserVO::getAccount).like(paramMap.get(Const.KEYWORD))
+                        .or(where(UserVO::getName).like(paramMap.get(Const.KEYWORD)))
+                        .or(where(UserVO::getEmail).like(paramMap.get(Const.KEYWORD)))
             ).map(CriteriaBuilder::build)
             .filter(Objects::nonNull)
             .toList();

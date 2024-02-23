@@ -28,11 +28,11 @@ public class DeviceController {
 
     @Operation(summary = "取得裝置清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
-    @Parameter(name = "keyword", schema = @Schema(implementation = String.class), description = "裝置名稱")
-    @Parameter(name = "page", schema = @Schema(implementation = Integer.class), description = "頁數")
-    @Parameter(name = "limit", schema = @Schema(implementation = Integer.class), description = "每頁幾筆")
-    @Parameter(name = "orderBy", schema = @Schema(implementation = String.class), description = "排序欄位")
-    @Parameter(name = "sort", schema = @Schema(implementation = String.class), description = "排序方向", example = "asc|desc")
+    @Parameter(name = Const.KEYWORD, schema = @Schema(implementation = String.class), description = "裝置名稱")
+    @Parameter(name = Const.PAGE, schema = @Schema(implementation = Integer.class), description = "頁數")
+    @Parameter(name = Const.LIMIT, schema = @Schema(implementation = Integer.class), description = "每頁幾筆")
+    @Parameter(name = Const.SORT_FIELD_KEY, schema = @Schema(implementation = String.class), description = "排序欄位")
+    @Parameter(name = Const.SORT_DIRECTION_KEY, schema = @Schema(implementation = String.class), description = "排序方向", example = "asc|desc")
     @GetMapping("/{laboratoryId}/{type}")
     public Page<DeviceVO> search(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                  @Parameter(name = "type", description = "裝置類型") @PathVariable DeviceType type,

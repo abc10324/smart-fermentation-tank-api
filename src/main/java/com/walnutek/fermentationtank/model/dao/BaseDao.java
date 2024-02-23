@@ -137,6 +137,40 @@ public abstract class BaseDao<T extends BaseColumns> {
                 () -> totalCount));
     }
 
+    protected <T, O> Page<O> aggregationSearch(QueryCondition beforeLookupCondition,
+                                               QueryCondition afterLookupCondition,
+                                               Class<T> from,
+                                               Class<O> to) {
+        var validPageable = getValidPageable(beforeLookupCondition.pageable);
+
+        List<AggregationOperation> aggregationList = new ArrayList<>();
+        beforeLookupCondition.criteriaList
+                .stream()
+                .map(Aggregation::match)
+                .forEach(aggregationList::add);
+        aggregationList.addAll(getLookupAggregation(to));
+        afterLookupCondition.criteriaList
+                .stream()
+                .map(Aggregation::match)
+                .forEach(aggregationList::add);
+
+        var totalCount = template.aggregate(newAggregation(from, aggregationList), to)
+                .getMappedResults()
+                .size();
+
+        aggregationList.add(skip(validPageable.getOffset()));
+        aggregationList.add(sort(beforeLookupCondition.sort));
+        aggregationList.add(limit(validPageable.getPageSize()));
+
+        var resultList = template.aggregate(newAggregation(from, aggregationList), to)
+                .getMappedResults();
+
+        return Page.of(PageableExecutionUtils.getPage(
+                resultList,
+                validPageable,
+                () -> totalCount));
+    }
+
     public <T, O> List<O> aggregationSelectList(QueryCondition condition, Class<T> from, Class<O> to) {
         List<AggregationOperation> aggregationList = new ArrayList<>();
         aggregationList.addAll(getLookupAggregation(to));
@@ -156,8 +190,8 @@ public abstract class BaseDao<T extends BaseColumns> {
     }
 
     protected Pageable getPageable(Map<String, Object> paramMap) {
-        int currentPage = Integer.parseInt(String.valueOf(paramMap.getOrDefault("page", Const.DEFAULT_PAGE)));
-        int limit = Integer.parseInt(String.valueOf(paramMap.getOrDefault("limit", Const.DEFAULT_LIMIT)));
+        int currentPage = Integer.parseInt(String.valueOf(paramMap.getOrDefault(Const.PAGE, Const.DEFAULT_PAGE)));
+        int limit = Integer.parseInt(String.valueOf(paramMap.getOrDefault(Const.LIMIT, Const.DEFAULT_LIMIT)));
 
         return PageRequest.of(currentPage, limit);
     }
@@ -312,6 +346,13 @@ public abstract class BaseDao<T extends BaseColumns> {
             vo.criteriaList = criteriaList;
             vo.sort = sort;
             vo.pageable = pageable;
+
+            return vo;
+        }
+
+        public static QueryCondition of(List<Criteria> criteriaList) {
+            var vo = new QueryCondition();
+            vo.criteriaList = criteriaList;
 
             return vo;
         }

@@ -1,5 +1,6 @@
 package com.walnutek.fermentationtank.model.dao;
 
+import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.model.entity.Alert;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
@@ -25,17 +26,29 @@ public class AlertDao extends BaseDao<Alert> {
     private MongoTemplate template;
 
     public Page<AlertVO> search(String laboratoryId, Map<String, Object> paramMap){
-        List<CriteriaBuilder> criteriaList = new ArrayList<>();
-        criteriaList.add(where(Device::getLaboratoryId).is(laboratoryId));
-        criteriaList.add(where(Device::getStatus).is(BaseColumns.Status.ACTIVE));
-        var keyword = paramMap.get("keyword");
+        List<CriteriaBuilder> beforeLookupCriteriaList = new ArrayList<>();
+        beforeLookupCriteriaList.add(where(Alert::getLaboratoryId).is(laboratoryId));
+        beforeLookupCriteriaList.add(where(Alert::getStatus).is(BaseColumns.Status.ACTIVE));
+        List<CriteriaBuilder> afterLookupCriteriaList = new ArrayList<>();
+        var keyword = paramMap.get(Const.KEYWORD);
         if(hasText(keyword)){
-            criteriaList.add(where(DeviceVO::getName).like(keyword));
+            afterLookupCriteriaList.add(
+                    where(Alert::getName).like(keyword)
+                    .or(where(Alert::getType).like(keyword))
+                    .or(where(Alert::getCheckField).like(keyword))
+                    .or(where(Device::getName).like(keyword))
+            );
         }
-        var queryList = criteriaList.stream().map(CriteriaBuilder::build).toList();
+        var beforeLookupCondition = beforeLookupCriteriaList.stream().map(CriteriaBuilder::build).toList();
+        var afterLookupCondition = afterLookupCriteriaList.stream().map(CriteriaBuilder::build).toList();
         var sort = getSort(paramMap);
         var pageable = getPageable(paramMap);
 
-        return aggregationSearch(QueryCondition.of(queryList, sort, pageable), Alert.class, AlertVO.class);
+        return aggregationSearch(
+                QueryCondition.of(beforeLookupCondition, sort, pageable),
+                QueryCondition.of(afterLookupCondition),
+                Alert.class,
+                AlertVO.class
+        );
     }
 }

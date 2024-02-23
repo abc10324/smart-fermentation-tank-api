@@ -147,13 +147,10 @@ public class DeviceService extends BaseService {
     }
 
     private void isDeviceAvailableEdit(String laboratoryId, String deviceId) {
+        checkUserIsBelongToLaboratory(laboratoryId);
         var device = deviceDao.selectByIdAndStatus(deviceId, BaseColumns.Status.ACTIVE);
         if(Objects.isNull(device)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的裝置");
-        }
-        var userLabList = getUserLabList();
-        if(!userLabList.contains(laboratoryId)){
-            throw new AppException(AppException.Code.E002, "非所屬實驗室人員無法編輯");
         }
     }
 

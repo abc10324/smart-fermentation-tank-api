@@ -58,4 +58,11 @@ public class BaseService {
         return labList;
     }
 
+    protected void checkUserIsBelongToLaboratory(String laboratoryId){
+        var userLabList = getUserLabList();
+        if(!userLabList.contains(laboratoryId)){
+            throw new AppException(AppException.Code.E002, "非所屬實驗室人員無法編輯");
+        }
+    }
+
 }

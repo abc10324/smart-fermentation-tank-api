@@ -19,10 +19,27 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 public class AlertRecord extends BaseColumns {
 
     /**
+     * 場域(實驗室Id)
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String laboratoryId;
+
+    /**
      * 警報Id
      */
     @Field(targetType = FieldType.OBJECT_ID)
     private String alertId;
+
+    /**
+     * 目標裝置(感應器Id)
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String deviceId;
+
+    /**
+     * 觸發警報數值
+     */
+    private Double triggerValue;
 
     /**
      * 狀態

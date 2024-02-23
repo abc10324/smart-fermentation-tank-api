@@ -25,11 +25,11 @@ public class LaboratoryController {
 
     @Operation(summary = "取得實驗室清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
-    @Parameter(name = "keyword", schema = @Schema(implementation = String.class), description = "實驗室名稱")
-    @Parameter(name = "page", schema = @Schema(implementation = Integer.class), description = "頁數")
-    @Parameter(name = "limit", schema = @Schema(implementation = Integer.class), description = "每頁幾筆")
-    @Parameter(name = "orderBy", schema = @Schema(implementation = String.class), description = "排序欄位")
-    @Parameter(name = "sort", schema = @Schema(implementation = String.class), description = "排序方向", example = "asc|desc")
+    @Parameter(name = Const.KEYWORD, schema = @Schema(implementation = String.class), description = "實驗室名稱")
+    @Parameter(name = Const.PAGE, schema = @Schema(implementation = Integer.class), description = "頁數")
+    @Parameter(name = Const.LIMIT, schema = @Schema(implementation = Integer.class), description = "每頁幾筆")
+    @Parameter(name = Const.SORT_FIELD_KEY, schema = @Schema(implementation = String.class), description = "排序欄位")
+    @Parameter(name = Const.SORT_DIRECTION_KEY, schema = @Schema(implementation = String.class), description = "排序方向", example = "asc|desc")
     @GetMapping
     public Page<LaboratoryVO> search(@Parameter(hidden = true) @RequestParam Map<String, Object> paramMap){
         return laboratoryService.search(paramMap);
