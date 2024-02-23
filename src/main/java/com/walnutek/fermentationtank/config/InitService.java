@@ -21,7 +21,7 @@ public class InitService {
             Const.COLLECTION_USER,
             Const.COLLECTION_LABORATORY,
             Const.COLLECTION_PROJECT,
-            Const.COLLECTION_FERMENTER,
+            Const.COLLECTION_DEVICE,
             Const.COLLECTION_SENSOR,
             Const.COLLECTION_SENSOR_RECORD,
             Const.COLLECTION_LINE_NOTIFY,

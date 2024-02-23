@@ -3,7 +3,7 @@ package com.walnutek.fermentationtank.model.service;
 import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
 import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
-import com.walnutek.fermentationtank.model.dao.FermenterDao;
+import com.walnutek.fermentationtank.model.dao.DeviceDao;
 import com.walnutek.fermentationtank.model.entity.*;
 import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
@@ -34,7 +34,7 @@ public class AlertRecordService {
     private AlertRecordDao alertRecordDao;
 
     @Autowired
-    private FermenterDao fermenterDao;
+    private DeviceDao deviceDao;
 
     public List<DashboardDataVO> listAllGroupByLaboratoryId(
             List<String> userLabList,
@@ -60,14 +60,14 @@ public class AlertRecordService {
                 .toList();
         var alertRecordList = alertRecordDao.selectList(alertRecordQuery);
         var alertRecordMap = alertRecordList.stream().collect(Collectors.toMap(AlertRecord::getAlertId, Function.identity()));
-        var fermenterQuery = Stream.of(
-                        where(Fermenter::getDeviceId).in(deviceIdList),
+        var deviceQuery = Stream.of(
+                        where(Device::getId).in(deviceIdList),
                         where(Alert::getStatus).is(BaseColumns.Status.ACTIVE)
                 ).map(CriteriaBuilder::build)
                 .filter(Objects::nonNull)
                 .toList();
-        var fermenterList = fermenterDao.selectList(fermenterQuery);
-        var fermenterMap = fermenterList.stream().collect(Collectors.toMap(Fermenter::getDeviceId, Fermenter::getName));
+        var deviceList = deviceDao.selectList(deviceQuery);
+        var deviceMap = deviceList.stream().collect(Collectors.toMap(Device::getId, Device::getName));
         var resulList = new ArrayList<DashboardDataVO>();
         for (String laboratoryId : map.keySet()) {
             if(userLabMap.containsKey(laboratoryId)){
@@ -78,8 +78,8 @@ public class AlertRecordService {
                 var dataList = new ArrayList<AlertRecordVO>();
                 map.get(laboratoryId).forEach( alert -> {
                     var alertRecord = alertRecordMap.get(alert.getId());
-                    var fermenter = fermenterMap.get(alert.getDeviceId());
-                    var alertRecordVO = AlertRecordVO.of(alertRecord, alert, fermenter, laboratoryName);
+                    var device = deviceMap.get(alert.getDeviceId());
+                    var alertRecordVO = AlertRecordVO.of(alertRecord, alert, device, laboratoryName);
                     dataList.add(alertRecordVO);
                 });
                 vo.total = dataList.size();

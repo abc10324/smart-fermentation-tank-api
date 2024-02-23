@@ -11,8 +11,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class DashboardVO {
 
-    @Schema(title = "醱酵槽列表")
-    private List<DashboardDataVO>  fermenterList;
+    @Schema(title = "裝置列表")
+    private List<DashboardDataVO>  deviceList;
 
     @Schema(title = "專案列表")
     private List<DashboardDataVO>  projectList;

@@ -23,10 +23,10 @@ public class ProjectVO extends BaseColumns {
     private String name;
 
     @Schema(title = "目標裝置ID")
-    private String fermenterId;
+    private String deviceId;
 
     @Schema(title = "目標裝置名稱")
-    private String fermenter;
+    private String device;
 
     @Schema(title = "起始時間")
     private LocalDateTime startTime;
@@ -34,13 +34,13 @@ public class ProjectVO extends BaseColumns {
     @Schema(title = "結束時間")
     private LocalDateTime endTime;
 
-    public static ProjectVO of(Project data, String labName, String fermenter) {
+    public static ProjectVO of(Project data, String labName, String device) {
         var vo = new ProjectVO();
         vo.laboratoryId = data.getLaboratoryId();
         vo.laboratory = labName;
         vo.name = data.getName();
-        vo.fermenterId = data.getFermenterId();
-        vo.fermenter = fermenter;
+        vo.deviceId = data.getDeviceId();
+        vo.device = device;
         vo.startTime = data.getStartTime();
         vo.endTime = data.getEndTime();
         syncBaseColumns(data, vo);

@@ -3,8 +3,9 @@ package com.walnutek.fermentationtank.model.entity;
 import com.walnutek.fermentationtank.config.Const;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 /**
  * 感應器
@@ -17,17 +18,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Sensor extends BaseColumns {
 
     /**
-     * 對應類型
+     * 場域(實驗室Id)
      */
-    private SensorType type = SensorType.FERMENTER;
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String laboratoryId;
 
-    @Getter
-    public enum SensorType {
-        FERMENTER( "醱酵槽");
-        private String name;
+    /**
+     * 裝置ID
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String deviceId;
 
-        SensorType(String name) {
-            this.name = name;
-        }
-    }
+    /**
+     * 標籤
+     */
+    private String label;
 }

@@ -30,7 +30,7 @@ public class Project extends BaseColumns {
      * 目標裝置ID
      */
     @Field(targetType = FieldType.OBJECT_ID)
-    private String fermenterId;
+    private String deviceId;
 
     /**
      * 專案名稱

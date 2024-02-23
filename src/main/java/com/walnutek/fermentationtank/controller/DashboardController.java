@@ -3,17 +3,15 @@ package com.walnutek.fermentationtank.controller;
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.entity.AlertRecord;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
-import com.walnutek.fermentationtank.model.entity.Fermenter;
+import com.walnutek.fermentationtank.model.entity.Device;
 import com.walnutek.fermentationtank.model.entity.Laboratory;
 import com.walnutek.fermentationtank.model.service.*;
 import com.walnutek.fermentationtank.model.vo.DashboardVO;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,7 +31,7 @@ public class DashboardController {
     private LaboratoryService laboratoryService;
 
     @Autowired
-    private FermenterService fermenterService;
+    private DeviceService deviceService;
 
     @Autowired
     private ProjectService projectService;
@@ -57,13 +55,13 @@ public class DashboardController {
 
         var vo = new DashboardVO();
 
-        // 醱酵槽列表
-        var fermenterList = fermenterService.listAllGroupByLaboratoryId(userLabIdList, userLabMap);
-        vo.setFermenterList(fermenterList);
+        // 裝置列表
+        var deviceList = deviceService.listAllGroupByLaboratoryId(userLabIdList, userLabMap);
+        vo.setDeviceList(deviceList);
 
         // 專案列表
-        var fermenterLabMap = getUserFermenterMap(userLabIdList);
-        var projectList = projectService.listAllGroupByLaboratoryId(userLabIdList, userLabMap, fermenterLabMap);
+        var deviceLabMap = getUserDeviceMap(userLabIdList);
+        var projectList = projectService.listAllGroupByLaboratoryId(userLabIdList, userLabMap, deviceLabMap);
         vo.setProjectList(projectList);
 
         var userParamMap = new HashMap<String, Object>();
@@ -86,14 +84,14 @@ public class DashboardController {
         return vo;
     }
 
-    private Map<String, String> getUserFermenterMap(List<String> userLabList){
+    private Map<String, String> getUserDeviceMap(List<String> userLabList){
         var query = List.of(
-                where(Fermenter::getLaboratoryId).in(userLabList).build(),
-                where(Fermenter::getStatus).is(BaseColumns.Status.ACTIVE).build()
+                where(Device::getLaboratoryId).in(userLabList).build(),
+                where(Device::getStatus).is(BaseColumns.Status.ACTIVE).build()
         );
-        var fermenterLabMap = new HashMap<String,String>();
-        fermenterService.listByQuery(query).stream().map(fermenter -> fermenterLabMap.put(fermenter.getId(), fermenter.getName()));
-        return fermenterLabMap;
+        var deviceLabMap = new HashMap<String,String>();
+        deviceService.listByQuery(query).stream().map(device -> deviceLabMap.put(device.getId(), device.getName()));
+        return deviceLabMap;
     }
 
     /* Dashboard 資料 ver.77
@@ -138,7 +136,7 @@ public class DashboardController {
     @Data
     private static class DashboardVO2 {
 
-        @Schema(title = "醱酵槽統計資料")
+        @Schema(title = "裝置統計資料")
         private StaticInfo<FermenterVO> fermenter = new StaticInfo<>();
 
         @Schema(title = "專案統計資料")

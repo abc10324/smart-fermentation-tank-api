@@ -2,7 +2,6 @@ package com.walnutek.fermentationtank.model.vo;
 
 import com.walnutek.fermentationtank.model.entity.Alert;
 import com.walnutek.fermentationtank.model.entity.AlertRecord;
-import com.walnutek.fermentationtank.model.entity.Fermenter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

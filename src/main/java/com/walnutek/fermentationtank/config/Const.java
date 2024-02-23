@@ -13,7 +13,7 @@ public class Const {
 	public static final String COLLECTION_USER = "user";
 	public static final String COLLECTION_LABORATORY = "laboratory";
 	public static final String COLLECTION_PROJECT = "project";
-	public static final String COLLECTION_FERMENTER = "fermenter";
+	public static final String COLLECTION_DEVICE = "device";
 	public static final String COLLECTION_SENSOR = "sensor";
 	public static final String COLLECTION_SENSOR_RECORD = "sensorRecord";
 	public static final String COLLECTION_LINE_NOTIFY = "lineNotify";

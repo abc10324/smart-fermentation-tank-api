@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -52,7 +53,7 @@ public class Alert extends BaseColumns {
     /**
      * 裝置分類
      */
-    private Sensor.SensorType type = Sensor.SensorType.FERMENTER;
+    private DeviceType type = DeviceType.FERMENTER;
 
     /**
      * 狀態

@@ -27,7 +27,7 @@ public class ProjectService extends BaseService {
     public List<DashboardDataVO> listAllGroupByLaboratoryId(
             List<String> userLabList,
             Map<String,String> userLabMap,
-            Map<String,String> fermenterLabMap
+            Map<String,String> deviceLabMap
     ) {
         var projectQuery = List.of(
                 where(Project::getLaboratoryId).in(userLabList).build(),
@@ -44,8 +44,8 @@ public class ProjectService extends BaseService {
                 vo.laboratory = laboratoryName;
                 vo.laboratoryId = laboratoryId;
                 var projectVOList = map.get(laboratoryId).stream().map(project -> {
-                    var fermenter = Optional.ofNullable(fermenterLabMap.get(project.getFermenterId())).orElse("");
-                    return ProjectVO.of(project, laboratoryName, fermenter);
+                    var device = Optional.ofNullable(deviceLabMap.get(project.getDeviceId())).orElse("");
+                    return ProjectVO.of(project, laboratoryName, device);
                 }).toList();
                 vo.total = projectVOList.size();
                 vo.data = projectVOList;

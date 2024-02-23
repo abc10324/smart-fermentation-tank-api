@@ -21,10 +21,10 @@ public class SensorRecord extends BaseColumns {
      * 感應器Id
      */
     @Field(targetType = FieldType.OBJECT_ID)
-    private String deviceId;
+    private String sensorId;
 
     /**
      * 資料
      */
-    private Object data;
+    private org.bson.Document data;
 }
