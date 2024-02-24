@@ -5,6 +5,7 @@ import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -44,7 +45,7 @@ public class Alert extends BaseColumns {
     /**
      * 條件
      */
-    private String condition;
+    private Condition condition;
 
     /**
      * 閥值
@@ -60,5 +61,30 @@ public class Alert extends BaseColumns {
      * 狀態
      */
     private Status status = Status.ACTIVE;
+
+    @Getter
+    public enum Condition {
+        GREATER_THAN( "大於"),
+
+        LESS_THAN( "小魚");
+        private String name;
+
+        Condition(String name) {
+            this.name = name;
+        }
+    }
+
+    public AlertRecord toAlertRecord(Double triggerValue){
+        var data = new AlertRecord();
+        data.setLaboratoryId(this.getLaboratoryId());
+        data.setAlertId(this.getId());
+        data.setDeviceId(this.getDeviceId());
+        data.setTriggerValue(triggerValue);
+        data.setState(AlertRecord.AlertState.ISSUE);
+
+        syncBaseColumns(this, data);
+
+        return data;
+    }
 }
 

@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
+import java.util.List;
+
 /**
  * 感應器
  * @author Walnutek-Sam
@@ -33,4 +35,9 @@ public class Sensor extends BaseColumns {
      * 標籤
      */
     private String label;
+
+    /**
+     * 目標欄位列表
+     */
+    private List<String> checkFieldList;
 }

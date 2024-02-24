@@ -26,5 +26,5 @@ public class SensorRecord extends BaseColumns {
     /**
      * 資料
      */
-    private org.bson.Document data;
+    private org.bson.Document uploadData;
 }

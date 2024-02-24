@@ -3,6 +3,7 @@ package com.walnutek.fermentationtank.model.vo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.walnutek.fermentationtank.config.mongo.AggregationLookupBuilder;
 import com.walnutek.fermentationtank.model.entity.*;
+import com.walnutek.fermentationtank.model.entity.Alert.Condition;
 import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -36,7 +37,7 @@ public class AlertVO extends BaseColumns {
     private String checkField;
 
     @Schema(title = "條件")
-    private String condition;
+    private Condition condition;
 
     @Schema(title = "閥值")
     private Double threshold;

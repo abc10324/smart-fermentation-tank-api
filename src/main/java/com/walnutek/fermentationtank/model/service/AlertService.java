@@ -1,8 +1,11 @@
 package com.walnutek.fermentationtank.model.service;
 
+import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
+import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
 import com.walnutek.fermentationtank.model.entity.Alert;
+import com.walnutek.fermentationtank.model.entity.AlertRecord;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.AlertVO;
@@ -12,8 +15,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
+
+import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 
 
 @Service
@@ -22,6 +30,9 @@ public class AlertService extends BaseService {
 
     @Autowired
     private AlertDao alertDao;
+
+    @Autowired
+    private AlertRecordDao alertRecordDao;
 
     public String createAlert(String laboratoryId, AlertVO vo){
         var user = getLoginUser();
@@ -49,6 +60,34 @@ public class AlertService extends BaseService {
 
     public Page<AlertVO> search(String laboratoryId, Map<String, Object> paramMap) {
         return alertDao.search(laboratoryId, paramMap);
+    }
+
+    public List<Alert> findListByQuery(Map<String, Object> paramMap){
+        var alertQuery = Stream.of(
+                        where(hasText(paramMap.get("laboratoryId")), Alert::getLaboratoryId).is(paramMap.get("laboratoryId")),
+                        where(hasText(paramMap.get("deviceId")), Alert::getDeviceId).is(paramMap.get("deviceId")),
+                        where(Alert::getStatus).is(BaseColumns.Status.ACTIVE)
+                        ).map(CriteriaBuilder::build)
+                .filter(Objects::nonNull)
+                .toList();
+        return alertDao.selectList(alertQuery);
+    }
+
+    public void checkSensorUploadDataAndSendAlertRecord(Map<String, Object> paramMap, org.bson.Document uploadData ) {
+        var alertList = findListByQuery(paramMap);
+        alertList.forEach(alert -> {
+            if(uploadData.containsKey(alert.getCheckField())){
+                var uploadDataValue = Double.valueOf(Integer.parseInt(uploadData.get(alert.getCheckField()).toString()));
+                var isIssueAlert = switch (alert.getCondition()){
+                    case GREATER_THAN -> uploadDataValue > alert.getThreshold();
+                    case LESS_THAN -> uploadDataValue < alert.getThreshold();
+                };
+                if(isIssueAlert){
+                    var alertRecord = alert.toAlertRecord(uploadDataValue);
+                    alertRecordDao.insert(alertRecord);
+                }
+            }
+        });
     }
 
     private Alert isAlertAvailableEdit(String laboratoryId, String alertId){
