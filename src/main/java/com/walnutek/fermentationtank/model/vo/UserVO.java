@@ -78,17 +78,12 @@ public class UserVO extends BaseColumns {
         return vo;
     }
 
-    public User toUser() {
-        var data = new User();
+    public User toUser(User data) {
         data.setAccount(account);
         data.setPassword(password);
         data.setName(name);
         data.setEmail(email);
         data.setLabList(labList);
-        data.setRole(role);
-        data.setStatus(status);
-        data.setLoginCount(loginCount);
-        data.setLastLoginTime(lastLoginTime);
 
         syncBaseColumns(this, data);
 

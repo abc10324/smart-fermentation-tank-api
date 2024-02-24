@@ -59,8 +59,7 @@ public class AlertVO extends BaseColumns {
                 .build();
     }
 
-    public Alert toAlert() {
-        var data = new Alert();
+    public Alert toAlert(Alert data) {
         data.setName(name);
         data.setType(type);
         data.setDeviceId(deviceId);

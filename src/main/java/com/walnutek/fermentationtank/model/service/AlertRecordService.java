@@ -42,8 +42,7 @@ public class AlertRecordService extends BaseService {
     private DeviceDao deviceDao;
 
     public void updateAlertRecord(String laboratoryId, String alertRecordId, AlertRecordVO vo) {
-        isAlertRecordAvailableEdit(laboratoryId, alertRecordId);
-        var data = alertRecordDao.selectById(alertRecordId);
+        var data = isAlertRecordAvailableEdit(laboratoryId, alertRecordId);
         data.setNote(vo.getNote());
         data.setState(vo.getState());
         alertRecordDao.updateById(data);
@@ -107,7 +106,7 @@ public class AlertRecordService extends BaseService {
         return resulList;
     }
 
-    private void isAlertRecordAvailableEdit(String laboratoryId, String alertRecordId){
+    private AlertRecord isAlertRecordAvailableEdit(String laboratoryId, String alertRecordId){
         checkUserIsBelongToLaboratory(laboratoryId);
         var query = Stream.of(
                         where(AlertRecord::getId).is(alertRecordId),
@@ -118,6 +117,8 @@ public class AlertRecordService extends BaseService {
         var alertRecord = alertRecordDao.selectOne(query);
         if(Objects.isNull(alertRecord)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的警報紀錄");
+        }else {
+            return alertRecord;
         }
     }
 }

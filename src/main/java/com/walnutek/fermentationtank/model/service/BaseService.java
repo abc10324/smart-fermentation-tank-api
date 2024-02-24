@@ -6,6 +6,7 @@ import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
 import com.walnutek.fermentationtank.model.dao.UserDao;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
+import com.walnutek.fermentationtank.model.entity.User.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +63,19 @@ public class BaseService {
         var userLabList = getUserLabList();
         if(!userLabList.contains(laboratoryId)){
             throw new AppException(AppException.Code.E002, "非所屬實驗室人員無法編輯");
+        }
+    }
+
+    protected void checkUserIsLaboratoryOwner(String ownerId){
+        var userId = getLoginUserId();
+        if(!userId.equals(ownerId)){
+            throw new AppException(AppException.Code.E002, "非實驗室管理者無法編輯");
+        }
+    }
+
+    protected void checkUserRole(Role checkRole, Role userRole){
+        if(!checkRole.equals(userRole)){
+            throw new AppException(AppException.Code.E002, "此帳號無權限做此操作");
         }
     }
 

@@ -48,12 +48,10 @@ public class DeviceVO extends BaseColumns {
         return vo;
     }
 
-    public Device toDevice() {
-        var data = new Device();
+    public Device toDevice(Device data) {
         data.setName(name);
         data.setLaboratoryId(laboratoryId);
         data.setType(type);
-        data.setStatus(status);
 
         syncBaseColumns(this, data);
 

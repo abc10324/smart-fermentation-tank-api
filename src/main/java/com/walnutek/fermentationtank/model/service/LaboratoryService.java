@@ -21,36 +21,26 @@ public class LaboratoryService extends BaseService {
 
     public String createLaboratory(LaboratoryVO vo) {
         var user = getLoginUser();
-        if(!User.Role.LAB_ADMIN.equals(user.getRole())){
-            throw new AppException(AppException.Code.E002, "此帳號無權限建立實驗室");
-        }
-        if(StringUtils.hasText(vo.getName())) {
-            var data = vo.toLaboratory();
-            data.setOwnerId(user.getId());
-            data.setName(vo.getName());
-            data.setNote(vo.getNote());
-            data.setStatus(BaseColumns.Status.ACTIVE);
-            laboratoryDao.insert(data);
+        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
+        checkCreateOrUpdateField(vo);
+        var data = vo.toLaboratory(new Laboratory());
+        data.setOwnerId(user.getId());
+        data.setStatus(BaseColumns.Status.ACTIVE);
+        laboratoryDao.insert(data);
 
-            return data.getId();
-        } else {
-            throw new AppException(AppException.Code.E002, "必填欄位資料不正確");
-        }
+        return data.getId();
     }
 
     public void deleteLaboratory(String id){
-        isLabAvailableEdit(id);
-        var data = laboratoryDao.selectById(id);
+        var data = isLabAvailableEdit(id);
         data.setStatus(BaseColumns.Status.DELETED);
         laboratoryDao.updateById(data);
     }
 
     public void updateLaboratory(String id, LaboratoryVO vo) {
-        isLabAvailableEdit(id);
-        var data = laboratoryDao.selectById(id);
-        data.setName(vo.getName());
-        data.setNote(vo.getNote());
-        laboratoryDao.updateById(data);
+        checkCreateOrUpdateField(vo);
+        var data = isLabAvailableEdit(id);
+        laboratoryDao.updateById(vo.toLaboratory(data));
     }
 
     public Page<LaboratoryVO> search(Map<String, Object> paramMap) {
@@ -77,15 +67,18 @@ public class LaboratoryService extends BaseService {
     }
 
 
-    private void isLabAvailableEdit(String id) {
-        var userId = getLoginUserId();
+    private Laboratory isLabAvailableEdit(String id) {
         var lab = laboratoryDao.selectByIdAndStatus(id, BaseColumns.Status.ACTIVE);
+        checkUserIsLaboratoryOwner(lab.getOwnerId());
         if(Objects.isNull(lab)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的實驗室");
+        }else {
+            return lab;
         }
-        if(!userId.equals(lab.getOwnerId())){
-            throw new AppException(AppException.Code.E002, "非實驗室管理者無法編輯");
-        }
+    }
+
+    private void checkCreateOrUpdateField(LaboratoryVO vo){
+        if(!StringUtils.hasText(vo.getName())) throw new AppException(AppException.Code.E002, "必填欄位資料不正確");
     }
 
 }

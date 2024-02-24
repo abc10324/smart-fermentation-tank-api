@@ -4,7 +4,6 @@ import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.entity.AlertRecord.AlertState;
 import com.walnutek.fermentationtank.model.service.AlertRecordService;
 import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
-import com.walnutek.fermentationtank.model.vo.AlertVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.Response;
 import io.swagger.v3.oas.annotations.Operation;

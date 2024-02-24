@@ -46,12 +46,9 @@ public class LaboratoryVO extends BaseColumns {
         return vo;
     }
 
-    public Laboratory toLaboratory() {
-        var data = new Laboratory();
-        data.setOwnerId(ownerId);
+    public Laboratory toLaboratory(Laboratory data) {
         data.setName(name);
         data.setNote(note);
-        data.setStatus(status);
 
         syncBaseColumns(this, data);
 

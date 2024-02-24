@@ -12,6 +12,7 @@ import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.DeviceVO;
 import com.walnutek.fermentationtank.model.vo.DeviceVO.ConnectionStatus;
 import com.walnutek.fermentationtank.model.vo.Page;
+import com.walnutek.fermentationtank.model.vo.ProjectVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
@@ -40,36 +41,26 @@ public class DeviceService extends BaseService {
     @Autowired
     private SensorRecordDao sensorRecordDao;
 
-    public String createDevice(String laboratoryId, DeviceVO vo) {
+    public String createDevice(DeviceVO vo) {
         var user = getLoginUser();
-        if(User.Role.SUPER_ADMIN.equals(user.getRole())){
-            throw new AppException(AppException.Code.E002, "此帳號無權限建立裝置");
-        }
-        if(StringUtils.hasText(vo.getName())) {
-            var data = vo.toDevice();
-            data.setLaboratoryId(laboratoryId);
-            data.setStatus(Status.ACTIVE);
-            deviceDao.insert(data);
+        checkUserRole(User.Role.SUPER_ADMIN, user.getRole());
+        checkCreateOrUpdateField(vo);
+        var data = vo.toDevice(new Device());
+        data.setStatus(Status.ACTIVE);
+        deviceDao.insert(data);
 
-            return data.getId();
-        } else {
-            throw new AppException(AppException.Code.E002, "必填欄位資料不正確");
-        }
+        return data.getId();
     }
 
     public void deleteDevice(String laboratoryId, String deviceId){
-        isDeviceAvailableEdit(laboratoryId, deviceId);
-        var data = deviceDao.selectById(deviceId);
+        var data = isDeviceAvailableEdit(laboratoryId, deviceId);
         data.setStatus(BaseColumns.Status.DELETED);
         deviceDao.updateById(data);
     }
 
     public void updateDevice(String laboratoryId, String deviceId, DeviceVO vo) {
-        isDeviceAvailableEdit(laboratoryId, deviceId);
-        var data = deviceDao.selectById(deviceId);
-        data.setName(vo.getName());
-        data.setLaboratoryId(vo.getLaboratoryId());
-        data.setType(vo.getType());
+        checkCreateOrUpdateField(vo);
+        var data = isDeviceAvailableEdit(laboratoryId, deviceId);
         deviceDao.updateById(data);
     }
 
@@ -146,12 +137,20 @@ public class DeviceService extends BaseService {
         return deviceDao.selectList(criteriaList);
     }
 
-    private void isDeviceAvailableEdit(String laboratoryId, String deviceId) {
+    private Device isDeviceAvailableEdit(String laboratoryId, String deviceId) {
         checkUserIsBelongToLaboratory(laboratoryId);
         var device = deviceDao.selectByIdAndStatus(deviceId, BaseColumns.Status.ACTIVE);
         if(Objects.isNull(device)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的裝置");
+        }else {
+            return device;
         }
+    }
+
+    private void checkCreateOrUpdateField(DeviceVO vo){
+        if(!StringUtils.hasText(vo.getName())
+                || !StringUtils.hasText(vo.getLaboratoryId())
+        ) throw new AppException(AppException.Code.E002, "必填欄位資料不正確");
     }
 
     private List<DeviceType> getDeviceTypeList(DeviceType type){

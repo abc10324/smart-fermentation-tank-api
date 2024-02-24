@@ -7,6 +7,7 @@ import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Laboratory;
 import com.walnutek.fermentationtank.model.entity.User;
+import com.walnutek.fermentationtank.model.entity.User.Role;
 import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.UserVO;
@@ -32,63 +33,43 @@ public class UserService extends BaseService {
 
     public String createUser(UserVO vo) {
         var user = getLoginUser();
-        var targetRole = switch (user.getRole()) {
-            case SUPER_ADMIN -> User.Role.LAB_ADMIN;
-            case LAB_ADMIN -> User.Role.LAB_USER;
+        var userId = user.getId();
+        var data = vo.toUser(new User());
+        Role targetRole;
+        switch (user.getRole()) {
+            case SUPER_ADMIN -> {
+                data.setLabList(List.of());
+                targetRole = Role.LAB_ADMIN;
+            }
+            case LAB_ADMIN -> {
+                data.setAdminId(userId);
+                targetRole = User.Role.LAB_USER;
+            }
             default -> throw new AppException(Code.E002, "此帳號無權限建立使用者");
         };
+        checkCreateOrUpdateField(vo, true, data);
 
-        if(StringUtils.hasText(vo.getAccount()) &&
-            StringUtils.hasText(vo.getPassword()) &&
-            !isAccountExist(vo.getAccount())) {
-
-            var data = vo.toUser();
-            data.setRole(targetRole);
-            data.setPassword(encryptPassword(data.getPassword()));
-
-            if(User.Role.LAB_ADMIN.equals(data.getRole())) {
-                data.setLabList(List.of());
-            } else if (User.Role.LAB_USER.equals(data.getRole())) {
-                data.setAdminId(getLoginUserId());
-            }
-
-            userDao.insert(data);
-
-			return data.getId();
-        } else {
-            throw new AppException(Code.E002, "必填欄位資料不正確");
-        }
+        data.setRole(targetRole);
+        data.setPassword(encryptPassword(data.getPassword()));
+        data.setStatus(BaseColumns.Status.ACTIVE);
+        userDao.insert(data);
+        return data.getId();
     }
 
     public void updateUser(UserVO vo) {
         updateUser(getLoginUserId(), vo);
 	}
 
-    public void updateUser(String id, UserVO vo) {
-    	if(isUserExist(id)) {
-    		var data = userDao.userValidCheckAndGetUserInfo(id);
-
-            if(!Objects.equals(data.getAccount(), vo.getAccount()) && isAccountExist(vo.getAccount())) {
-                throw new AppException(Code.E002, "欲更改的帳號已存在");
-            }
-
-            data.setAccount(vo.getAccount());
-			data.setName(vo.getName());
-			data.setEmail(vo.getEmail());
-			data.setLabList(vo.getLabList());
-
-            if(StringUtils.hasText(vo.getPassword())) {
-                data.setPassword(encryptPassword(vo.getPassword()));
-            }
-
-    		userDao.updateById(data);
-    	} else {
-    		throw new AppException(Code.E002, "無法更新不存在的使用者");
-    	}
+    public void updateUser(String userId, UserVO vo) {
+        var data = isUserAvailableEdit(userId);
+        checkCreateOrUpdateField(vo, false, data);
+        vo.toUser(data);
+        data.setPassword(encryptPassword(vo.getPassword()));
+        userDao.updateById(data);
     }
 
     public void updateUserStatus(String userId, User.Status isActive) {
-        var user = userDao.userValidCheckAndGetUserInfo(userId);
+        var user = isUserAvailableEdit(userId);
         user.setStatus(isActive);
         userDao.updateById(user);
     }
@@ -209,14 +190,34 @@ public class UserService extends BaseService {
         userDao.updateById(user);
     }
 
-    private boolean isUserExist(String id) {
-        return userDao.existById(id);
-    }
-
     private String encryptPassword(String password){
         return Optional.ofNullable(password)
                 .filter(StringUtils::hasText)
                 .map(cipherService::encrypt)
                 .orElse(password);
+    }
+
+    private User isUserAvailableEdit(String userId){
+        var user = userDao.selectByIdAndStatus(userId, BaseColumns.Status.ACTIVE);
+        if(Objects.isNull(user)){
+            throw new AppException(AppException.Code.E002, "無法更新不存在的使用者");
+        }else {
+            return user;
+        }
+    }
+
+    private void checkCreateOrUpdateField(UserVO vo, Boolean isCreate, User data){
+        if(!StringUtils.hasText(vo.getAccount())
+                || !StringUtils.hasText(vo.getPassword())
+                || Objects.isNull(vo.getRole())
+                || !StringUtils.hasText(vo.getName())
+                || !StringUtils.hasText(vo.getEmail())
+                || Objects.isNull(vo.getLabList())
+                || vo.getLabList().isEmpty()
+        ) throw new AppException(AppException.Code.E002, "必填欄位資料不正確");
+
+        if(isCreate || !Objects.equals(data.getAccount(), vo.getAccount())){
+            if(isAccountExist(vo.getAccount())) throw new AppException(Code.E002, "欲更改的帳號已存在");
+        }
     }
 }

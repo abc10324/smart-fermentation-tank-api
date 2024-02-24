@@ -1,12 +1,16 @@
 package com.walnutek.fermentationtank.model.vo;
 
-import com.walnutek.fermentationtank.model.entity.BaseColumns;
-import com.walnutek.fermentationtank.model.entity.Project;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.walnutek.fermentationtank.config.mongo.AggregationLookupBuilder;
+import com.walnutek.fermentationtank.model.entity.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Schema(title = "專案VO")
 @Data
@@ -46,6 +50,35 @@ public class ProjectVO extends BaseColumns {
         syncBaseColumns(data, vo);
 
         return vo;
+    }
+
+    public Project toProject(Project data) {
+        data.setDeviceId(deviceId);
+        data.setName(name);
+        data.setStartTime(startTime);
+        data.setEndTime(endTime);
+
+        syncBaseColumns(this, data);
+
+        return data;
+    }
+
+    @JsonIgnore
+    public static List<AggregationOperation> getLookupAggregation() {
+        List<AggregationOperation> aggregationList = new ArrayList<>();
+        aggregationList.addAll(getDeviceLookupAggregation());
+
+        return aggregationList;
+    }
+
+    private static List<AggregationOperation> getDeviceLookupAggregation() {
+        return AggregationLookupBuilder.from(Project.class)
+                .outerJoin(Device.class)
+                .on(Project::getDeviceId, Device::getId)
+                .mappingTo(ProjectVO.class)
+                .asArrayField()
+                .mapping(Device::getName, ProjectVO::getDevice)
+                .build();
     }
 
 }

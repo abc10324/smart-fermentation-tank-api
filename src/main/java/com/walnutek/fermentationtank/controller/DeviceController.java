@@ -62,7 +62,8 @@ public class DeviceController {
     @PostMapping("/{laboratoryId}")
     public Response createDevice(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                      @RequestBody DeviceVO vo) {
-        deviceService.createDevice(laboratoryId, vo);
+        vo.setLaboratoryId(laboratoryId);
+        deviceService.createDevice(vo);
         return Response.ok();
     }
 
