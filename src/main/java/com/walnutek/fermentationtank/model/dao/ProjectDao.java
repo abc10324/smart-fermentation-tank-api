@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_DEVICE;
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 
@@ -29,7 +30,7 @@ public class ProjectDao extends BaseDao<Project> {
         if(hasText(keyword)){
             afterLookupCriteriaList.add(
                     where(Project::getName).like(keyword)
-                            .or(where(Device::getName).like(keyword))
+                            .or(where(LOOKUP_COLLECTION_DEVICE + ".name").like(keyword))
             );
         }
         var beforeLookupCondition = beforeLookupCriteriaList.stream().map(CriteriaBuilder::build).toList();

@@ -40,6 +40,11 @@ public class AggregationLookupBuilder<S, T, V> {
 		tempFieldName = UUID.randomUUID().toString().replaceAll("-", "");
 	}
 
+	public AggregationLookupBuilder<S, T, V> as(String customAsField) {
+		tempFieldName = customAsField;
+		return this;
+	}
+
 	public static <S> AggregationLookupFromBuilder<S> from(Class<S> sourceEntity) {
 		return AggregationLookupFromBuilder.from(sourceEntity);
 	}
@@ -56,7 +61,7 @@ public class AggregationLookupBuilder<S, T, V> {
 		addFieldsOperationList.add(addField);
 		return this;
 	}
-	
+
 	public AggregationLookupBuilder<S, T, V> mapping(SFunction<V, ?> voEntityFieldGetter) {
 		var addField = addFields().addField(field(voEntityFieldGetter))
 						.withValue(mappingField(tempFieldName))
@@ -87,7 +92,7 @@ public class AggregationLookupBuilder<S, T, V> {
 			var unwind = unwind(tempFieldName, preserveNullAndEmptyArrays);
 			resultList.add(unwind);
 		}
-		
+
 		addFieldsOperationList.forEach(resultList::add);
 
 		return resultList;
@@ -95,12 +100,12 @@ public class AggregationLookupBuilder<S, T, V> {
 
 	private static <T> String getCollectionName(Class<T> entity) {
 		var collection = "";
-		
+
 		var document = entity.getAnnotation(Document.class);
 		if(Objects.nonNull(document) && StringUtils.hasText(document.value())) {
 			collection = document.value();
 		}
-		
+
 		return collection;
 	}
 

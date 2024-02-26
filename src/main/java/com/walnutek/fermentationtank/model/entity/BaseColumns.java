@@ -82,6 +82,14 @@ public class BaseColumns {
 		target.setUpdateUser(source.getUpdateUser());
 	}
 
+	public static <S extends BaseColumns,T extends BaseColumns> void updateBaseColumns(S target,T source) {
+		target.setId(source.getId());
+		target.setCreateTime(source.getCreateTime());
+		target.setCreateUser(source.getCreateUser());
+		target.setUpdateTime(source.getUpdateTime());
+		target.setUpdateUser(source.getUpdateUser());
+	}
+
 	@Getter
 	public enum Status {
 		DELETED( "刪除"),

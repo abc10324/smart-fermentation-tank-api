@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
@@ -27,7 +28,7 @@ public class ProjectService extends BaseService {
 
     public String createProject(String laboratoryId, ProjectVO vo) {
         var user = getLoginUser();
-        checkUserRole(User.Role.SUPER_ADMIN, user.getRole());
+        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
         var data = vo.toProject(new Project());
         data.setLaboratoryId(laboratoryId);
@@ -46,6 +47,8 @@ public class ProjectService extends BaseService {
     public void updateProject(String laboratoryId, String projectId, ProjectVO vo) {
         var data = isProjectAvailableEdit(laboratoryId, projectId);
         checkCreateOrUpdateField(vo);
+        data.setUpdateTime(LocalDateTime.now());
+        data.setUpdateUser(getLoginUserId());
         projectDao.updateById(vo.toProject(data));
     }
 

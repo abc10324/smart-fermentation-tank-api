@@ -36,7 +36,7 @@ public class AlertService extends BaseService {
 
     public String createAlert(String laboratoryId, AlertVO vo){
         var user = getLoginUser();
-        checkUserRole(User.Role.SUPER_ADMIN, user.getRole());
+        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
         var data = vo.toAlert(new Alert());
         data.setLaboratoryId(laboratoryId);

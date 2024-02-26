@@ -23,5 +23,7 @@ public class Const {
 	public static final String COLLECTION_ALERT = "alert";
 	public static final String COLLECTION_ALERT_RECORD = "alertRecord";
 
+	public static final String LOOKUP_COLLECTION_DEVICE = "deviceInfo";
+
 	public static final String BEARER_JWT = "Authorization";
 }

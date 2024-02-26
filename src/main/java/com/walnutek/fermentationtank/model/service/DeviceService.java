@@ -43,7 +43,7 @@ public class DeviceService extends BaseService {
 
     public String createDevice(DeviceVO vo) {
         var user = getLoginUser();
-        checkUserRole(User.Role.SUPER_ADMIN, user.getRole());
+        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
         var data = vo.toDevice(new Device());
         data.setStatus(Status.ACTIVE);

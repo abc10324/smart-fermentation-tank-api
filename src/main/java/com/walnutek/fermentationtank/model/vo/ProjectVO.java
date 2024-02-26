@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_DEVICE;
+
 @Schema(title = "專案VO")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -58,7 +60,7 @@ public class ProjectVO extends BaseColumns {
         data.setStartTime(startTime);
         data.setEndTime(endTime);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }
@@ -76,6 +78,7 @@ public class ProjectVO extends BaseColumns {
                 .outerJoin(Device.class)
                 .on(Project::getDeviceId, Device::getId)
                 .mappingTo(ProjectVO.class)
+                .as(LOOKUP_COLLECTION_DEVICE)
                 .asArrayField()
                 .mapping(Device::getName, ProjectVO::getDevice)
                 .build();
