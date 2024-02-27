@@ -23,6 +23,8 @@ public class SensorRecord extends BaseColumns {
     @Field(targetType = FieldType.OBJECT_ID)
     private String sensorId;
 
+    private Long recordTime;
+
     /**
      * 資料
      */

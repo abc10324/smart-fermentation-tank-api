@@ -29,6 +29,9 @@ public class SensorVO extends BaseColumns {
     @Schema(title = "標籤")
     private String label;
 
+    @Schema(title = "recordTime")
+    private Long recordTime;
+
     @Schema(title = "資料")
     private org.bson.Document uploadData;
 
@@ -45,6 +48,7 @@ public class SensorVO extends BaseColumns {
 
     public SensorRecord toSensorRecord(SensorRecord data) {
         data.setSensorId(id);
+        data.setRecordTime(recordTime);
         data.setUploadData(uploadData);
 
         updateBaseColumns(this, data);

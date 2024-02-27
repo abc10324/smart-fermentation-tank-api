@@ -5,7 +5,6 @@ import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
 import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
 import com.walnutek.fermentationtank.model.entity.Alert;
-import com.walnutek.fermentationtank.model.entity.AlertRecord;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.vo.AlertVO;
@@ -79,15 +78,18 @@ public class AlertService extends BaseService {
     public void checkSensorUploadDataAndSendAlertRecord(Map<String, Object> paramMap, org.bson.Document uploadData ) {
         var alertList = findListByQuery(paramMap);
         alertList.forEach(alert -> {
-            if(uploadData.containsKey(alert.getCheckField())){
-                var uploadDataValue = Double.valueOf(Integer.parseInt(uploadData.get(alert.getCheckField()).toString()));
-                var isIssueAlert = switch (alert.getCondition()){
-                    case GREATER_THAN -> uploadDataValue > alert.getThreshold();
-                    case LESS_THAN -> uploadDataValue < alert.getThreshold();
-                };
-                if(isIssueAlert){
-                    var alertRecord = alert.toAlertRecord(uploadDataValue);
-                    alertRecordDao.insert(alertRecord);
+            var checkField = alert.getCheckField();
+            if(uploadData.containsKey(checkField)){
+                if(uploadData.get(checkField) instanceof Double uploadDataValue){
+                    var isIssueAlert = switch (alert.getCondition()){
+                        case GREATER_THAN -> uploadDataValue > alert.getThreshold();
+                        case LESS_THAN -> uploadDataValue < alert.getThreshold();
+                    };
+
+                    if(isIssueAlert){
+                        var alertRecord = alert.toAlertRecord(uploadDataValue);
+                        alertRecordDao.insert(alertRecord);
+                    }
                 }
             }
         });

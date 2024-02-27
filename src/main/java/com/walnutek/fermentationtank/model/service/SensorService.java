@@ -5,7 +5,6 @@ import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
 import com.walnutek.fermentationtank.model.dao.SensorDao;
 import com.walnutek.fermentationtank.model.dao.SensorRecordDao;
-import com.walnutek.fermentationtank.model.entity.AlertRecord;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Sensor;
 import com.walnutek.fermentationtank.model.entity.SensorRecord;
@@ -50,10 +49,17 @@ public class SensorService {
             sensorId = sensor.getId();
         }
         vo.setId(sensorId);
-        // 寫入sensorRecord資料
-        var sensorRecord = vo.toSensorRecord(new SensorRecord());
-        sensorRecordDao.insert(sensorRecord);
-        return sensorRecord.getId();
+        var sensorRecord = isSenorRecordExists(vo);
+        String sensorRecordId;
+        if(Objects.isNull(sensorRecord)){
+            // 寫入sensorRecord資料
+            var insertOne = vo.toSensorRecord(new SensorRecord());
+            sensorRecordDao.insert(insertOne);
+            sensorRecordId = insertOne.getId();
+        }else {
+            sensorRecordId = sensorRecord.getId();
+        }
+        return sensorRecordId;
     }
 
     public List<Sensor> findListByQuery(Map<String, Object> paramMap){
@@ -74,13 +80,21 @@ public class SensorService {
         }
     }
 
-    private Sensor isSenorExists(SensorVO sensor) {
+    private Sensor isSenorExists(SensorVO vo) {
         var sensorQuery = List.of(
-                where(Sensor::getLaboratoryId).is(sensor.getLaboratoryId()).build(),
-                where(Sensor::getDeviceId).is(sensor.getDeviceId()).build(),
-                where(Sensor::getLabel).is(sensor.getLabel()).build()
+                where(Sensor::getLaboratoryId).is(vo.getLaboratoryId()).build(),
+                where(Sensor::getDeviceId).is(vo.getDeviceId()).build(),
+                where(Sensor::getLabel).is(vo.getLabel()).build()
         );
         return sensorDao.selectOne(sensorQuery);
+    }
+
+    private SensorRecord isSenorRecordExists(SensorVO vo) {
+        var sensorRecordQuery = List.of(
+                where(SensorRecord::getSensorId).is(vo.getId()).build(),
+                where(SensorRecord::getRecordTime).is(vo.getRecordTime()).build()
+        );
+        return sensorRecordDao.selectOne(sensorRecordQuery);
     }
 
     private void checkCreateOrUpdateField(SensorVO vo){
