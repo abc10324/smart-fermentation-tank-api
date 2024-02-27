@@ -53,7 +53,7 @@ public class DeviceVO extends BaseColumns {
         data.setLaboratoryId(laboratoryId);
         data.setType(type);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }

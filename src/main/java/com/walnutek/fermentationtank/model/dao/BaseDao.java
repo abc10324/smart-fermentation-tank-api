@@ -114,11 +114,25 @@ public abstract class BaseDao<T extends BaseColumns> {
         var validPageable = getValidPageable(condition.pageable);
 
         List<AggregationOperation> aggregationList = new ArrayList<>();
-        aggregationList.addAll(getLookupAggregation(to));
-        condition.criteriaList
-                .stream()
-                .map(Aggregation::match)
-                .forEach(aggregationList::add);
+        Boolean isBeforeLookupCondition;
+        if(Objects.nonNull(condition.isBeforeLookupCondition)){
+            isBeforeLookupCondition = condition.isBeforeLookupCondition;
+        }else {
+            isBeforeLookupCondition = false;
+        }
+        if(isBeforeLookupCondition){
+            condition.criteriaList
+                    .stream()
+                    .map(Aggregation::match)
+                    .forEach(aggregationList::add);
+            aggregationList.addAll(getLookupAggregation(to));
+        }else {
+            aggregationList.addAll(getLookupAggregation(to));
+            condition.criteriaList
+                    .stream()
+                    .map(Aggregation::match)
+                    .forEach(aggregationList::add);
+        }
 
         var totalCount = template.aggregate(newAggregation(from, aggregationList), to)
                                  .getMappedResults()
@@ -341,12 +355,16 @@ public abstract class BaseDao<T extends BaseColumns> {
          */
         private Pageable pageable;
 
+        /**
+         * 是否先過濾再lookup
+         */
+        private Boolean isBeforeLookupCondition;
+
         public static QueryCondition of(List<Criteria> criteriaList, Sort sort, Pageable pageable) {
             var vo = new QueryCondition();
             vo.criteriaList = criteriaList;
             vo.sort = sort;
             vo.pageable = pageable;
-
             return vo;
         }
 

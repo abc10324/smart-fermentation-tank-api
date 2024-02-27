@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 import static com.walnutek.fermentationtank.model.service.Utils.hasArray;
+import static com.walnutek.fermentationtank.model.service.Utils.ObjectToList;
 
 @Repository
 public class LaboratoryDao extends BaseDao<Laboratory> {
@@ -31,8 +32,8 @@ public class LaboratoryDao extends BaseDao<Laboratory> {
 
     private QueryCondition getQueryCondition(Map<String,Object> paramMap) {
         var criteriaList = Stream.of(
-                        where(hasArray(paramMap.get("labList")), Laboratory::getId).in(paramMap.get("labList")),
-                        where(hasText(paramMap.get("status")), Laboratory::getStatus).in(paramMap.get("status")),
+                        where(hasArray(paramMap.get("labList")), Laboratory::getId).in(ObjectToList(paramMap.get("labList"))),
+                        where(hasText(paramMap.get("status")), Laboratory::getStatus).is(paramMap.get("status")),
                         where(hasText(paramMap.get(Const.KEYWORD)), Laboratory::getName).like(paramMap.get(Const.KEYWORD))
                 ).map(CriteriaBuilder::build)
                 .filter(Objects::nonNull)
@@ -40,7 +41,8 @@ public class LaboratoryDao extends BaseDao<Laboratory> {
 
         var sort = getSort(paramMap);
         var pageable = getPageable(paramMap);
-
-        return QueryCondition.of(criteriaList, sort, pageable);
+        var condition = QueryCondition.of(criteriaList, sort, pageable);
+        condition.setIsBeforeLookupCondition(true);
+        return condition;
     }
 }

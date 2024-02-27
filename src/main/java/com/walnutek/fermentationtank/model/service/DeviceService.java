@@ -61,7 +61,7 @@ public class DeviceService extends BaseService {
     public void updateDevice(String laboratoryId, String deviceId, DeviceVO vo) {
         checkCreateOrUpdateField(vo);
         var data = isDeviceAvailableEdit(laboratoryId, deviceId);
-        deviceDao.updateById(data);
+        deviceDao.updateById(vo.toDevice(data));
     }
 
     public ConnectionStatus checkDeviceConnectionStatus(String laboratoryId, String deviceId){
@@ -70,15 +70,18 @@ public class DeviceService extends BaseService {
                 where(Sensor::getLaboratoryId).is(laboratoryId).build(),
                 where(Sensor::getDeviceId).is(deviceId).build()
         );
-        var sensor = Optional.ofNullable(sensorDao.selectOne(sensorQuery))
-                .orElseThrow(() -> new AppException(AppException.Code.E004));
-        var checkPointTime = LocalDateTime.now().minusMinutes(30);
-        var sensorRecordQuery = List.of(
-                where(SensorRecord::getSensorId).is(sensor.getId()).build(),
-                where(Sensor::getCreateTime).gte(checkPointTime).build()
-        );
-        return Objects.nonNull(sensorRecordDao.selectOne(sensorRecordQuery))
-                ?ConnectionStatus.NORMAL:ConnectionStatus.EXCEPTION;
+        var sensor = sensorDao.selectOne(sensorQuery);
+        if(Objects.nonNull(sensor)){
+            var checkPointTime = LocalDateTime.now().minusMinutes(30);
+            var sensorRecordQuery = List.of(
+                    where(SensorRecord::getSensorId).is(sensor.getId()).build(),
+                    where(Sensor::getCreateTime).gte(checkPointTime).build()
+            );
+            return Objects.nonNull(sensorRecordDao.selectOne(sensorRecordQuery))
+                    ?ConnectionStatus.NORMAL:ConnectionStatus.EXCEPTION;
+        }else {
+            return ConnectionStatus.EXCEPTION;
+        }
     }
 
     public Page<DeviceVO> search(String laboratoryId, DeviceType type, Map<String, Object> paramMap) {

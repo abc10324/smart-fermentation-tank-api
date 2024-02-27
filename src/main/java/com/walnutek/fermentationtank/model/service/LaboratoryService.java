@@ -55,7 +55,6 @@ public class LaboratoryService extends BaseService {
         if(!SUPER_ADMIN.equals(user.getRole()) && labList.isEmpty()){
             return result;
         }
-
         paramMap.put("labList",labList);
         paramMap.put("status", BaseColumns.Status.ACTIVE);
         result = laboratoryDao.search(paramMap);

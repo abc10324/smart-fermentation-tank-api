@@ -5,13 +5,10 @@ import com.walnutek.fermentationtank.exception.AppException.Code;
 import org.springframework.data.mongodb.core.aggregation.Field;
 import org.springframework.data.mongodb.core.aggregation.Fields;
 import org.springframework.util.StringUtils;
-import org.yaml.snakeyaml.util.ArrayUtils;
 
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,12 +26,21 @@ public class Utils {
 
 	public static Boolean hasArray(Object value) {
 		var result = false;
+
 		if(Objects.nonNull(value)){
 			if (value instanceof List list && !list.isEmpty()) {
 				result = true;
 			}
 		}
 		return result;
+	}
+
+	public static List ObjectToList(Object value){
+		if (value instanceof List list) {
+			return list;
+		}else {
+			throw new AppException(Code.E000);
+		}
 	}
 
 	public static String id() {

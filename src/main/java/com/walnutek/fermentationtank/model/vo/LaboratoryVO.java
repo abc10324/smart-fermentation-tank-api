@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_USER;
+
 @Schema(title = "實驗室VO")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -68,6 +70,7 @@ public class LaboratoryVO extends BaseColumns {
                 .outerJoin(User.class)
                 .on(Laboratory::getId, User::getLabList)
                 .mappingTo(LaboratoryVO.class)
+                .as(LOOKUP_COLLECTION_USER)
                 .asArrayField()
                 .mapping(LaboratoryVO::getMemberList)
                 .build();
