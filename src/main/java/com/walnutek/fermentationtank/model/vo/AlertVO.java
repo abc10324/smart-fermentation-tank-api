@@ -15,6 +15,8 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_DEVICE;
+
 @Schema(title = "警報設定VO")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -55,6 +57,7 @@ public class AlertVO extends BaseColumns {
                 .outerJoin(Device.class)
                 .on(Alert::getDeviceId, Device::getId)
                 .mappingTo(AlertVO.class)
+                .as(LOOKUP_COLLECTION_DEVICE)
                 .asArrayField()
                 .mapping(Device::getName, AlertVO::getDevice)
                 .build();
@@ -68,7 +71,7 @@ public class AlertVO extends BaseColumns {
         data.setCondition(condition);
         data.setThreshold(threshold);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }
