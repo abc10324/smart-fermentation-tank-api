@@ -2,12 +2,15 @@ package com.walnutek.fermentationtank.model.vo;
 
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Sensor;
-import com.walnutek.fermentationtank.model.entity.SensorRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Schema(title = "SensorVO")
 @Data
@@ -29,27 +32,21 @@ public class SensorVO extends BaseColumns {
     @Schema(title = "標籤")
     private String label;
 
-    @Schema(title = "recordTime")
-    private Long recordTime;
-
     @Schema(title = "資料")
-    private org.bson.Document uploadData;
+    private List<SensorRecordVO> uploadList;
 
     public Sensor toSensor(Sensor data) {
         data.setLaboratoryId(laboratoryId);
         data.setDeviceId(deviceId);
         data.setLabel(label);
-        data.setCheckFieldList(uploadData.keySet().stream().toList());
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
-    public SensorRecord toSensorRecord(SensorRecord data) {
-        data.setSensorId(id);
-        data.setRecordTime(recordTime);
-        data.setUploadData(uploadData);
+        List<String> checkFieldList = new ArrayList<>();
+        if(!uploadList.isEmpty()){
+            var uploadData = uploadList.get(0).getUploadData();
+            if (Objects.nonNull(uploadData)){
+                checkFieldList = uploadData.keySet().stream().toList();
+            }
+        }
+        data.setCheckFieldList(checkFieldList);
 
         updateBaseColumns(this, data);
 

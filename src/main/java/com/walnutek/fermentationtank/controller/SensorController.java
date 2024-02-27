@@ -81,17 +81,16 @@ public class SensorController {
     @Operation(summary = "新增Sensor")
     @SecurityRequirement(name = Const.BEARER_JWT)
     @PostMapping("/{laboratoryId}")
-    public Response createSensor(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
-                                  @RequestBody SensorVO vo) {
-        sensorService.createSensorAndRecord(laboratoryId, vo);
+    public Response createSensor(
+            @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
+            @RequestBody SensorVO vo
+    ) {
+        var finalUpdateList = sensorService.createSensorAndRecord(laboratoryId, vo);
         //檢查目標欄位的條件跟閥值並發布警報
         var alertParamMap = new HashMap<String, Object>();
         alertParamMap.put("laboratoryId", laboratoryId);
         alertParamMap.put("deviceId", vo.getDeviceId());
-        alertService.checkSensorUploadDataAndSendAlertRecord(alertParamMap, vo.getUploadData());
-
+        finalUpdateList.forEach(record -> alertService.checkSensorUploadDataAndSendAlertRecord(alertParamMap, record));
         return Response.ok();
     }
-
-
 }

@@ -7,6 +7,7 @@ import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
 import com.walnutek.fermentationtank.model.entity.Alert;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.User;
+import com.walnutek.fermentationtank.model.entity.SensorRecord;
 import com.walnutek.fermentationtank.model.vo.AlertVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,24 +76,27 @@ public class AlertService extends BaseService {
         return alertDao.selectList(alertQuery);
     }
 
-    public void checkSensorUploadDataAndSendAlertRecord(Map<String, Object> paramMap, org.bson.Document uploadData ) {
+    public void checkSensorUploadDataAndSendAlertRecord(Map<String, Object> paramMap, SensorRecord record ) {
         var alertList = findListByQuery(paramMap);
-        alertList.forEach(alert -> {
-            var checkField = alert.getCheckField();
-            if(uploadData.containsKey(checkField)){
-                if(uploadData.get(checkField) instanceof Double uploadDataValue){
-                    var isIssueAlert = switch (alert.getCondition()){
-                        case GREATER_THAN -> uploadDataValue > alert.getThreshold();
-                        case LESS_THAN -> uploadDataValue < alert.getThreshold();
-                    };
+        var uploadData = record.getUploadData();
+        if(Objects.nonNull(uploadData)){
+            alertList.forEach(alert -> {
+                var checkField = alert.getCheckField();
+                if(uploadData.containsKey(checkField)){
+                    if(uploadData.get(checkField) instanceof Double uploadDataValue){
+                        var isIssueAlert = switch (alert.getCondition()){
+                            case GREATER_THAN -> uploadDataValue > alert.getThreshold();
+                            case LESS_THAN -> uploadDataValue < alert.getThreshold();
+                        };
 
-                    if(isIssueAlert){
-                        var alertRecord = alert.toAlertRecord(uploadDataValue);
-                        alertRecordDao.insert(alertRecord);
+                        if(isIssueAlert){
+                            var alertRecord = alert.toAlertRecord(uploadDataValue);
+                            alertRecordDao.insert(alertRecord);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     private Alert isAlertAvailableEdit(String laboratoryId, String alertId){
