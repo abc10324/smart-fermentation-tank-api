@@ -27,5 +27,7 @@ public class Const {
 
 	public static final String LOOKUP_COLLECTION_USER = "userInfo";
 
+	public static final String LOOKUP_COLLECTION_ALERT = "alertInfo";
+
 	public static final String BEARER_JWT = "Authorization";
 }

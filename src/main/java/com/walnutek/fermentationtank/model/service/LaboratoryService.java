@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.walnutek.fermentationtank.model.entity.User.Role.SUPER_ADMIN;
@@ -40,6 +41,8 @@ public class LaboratoryService extends BaseService {
     public void updateLaboratory(String id, LaboratoryVO vo) {
         checkCreateOrUpdateField(vo);
         var data = isLabAvailableEdit(id);
+        data.setUpdateTime(LocalDateTime.now());
+        data.setUpdateUser(getLoginUserId());
         laboratoryDao.updateById(vo.toLaboratory(data));
     }
 

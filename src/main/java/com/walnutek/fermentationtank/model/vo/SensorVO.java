@@ -38,7 +38,7 @@ public class SensorVO extends BaseColumns {
         data.setLabel(label);
         data.setCheckFieldList(uploadData.keySet().stream().toList());
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }
@@ -47,7 +47,7 @@ public class SensorVO extends BaseColumns {
         data.setSensorId(id);
         data.setUploadData(uploadData);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }

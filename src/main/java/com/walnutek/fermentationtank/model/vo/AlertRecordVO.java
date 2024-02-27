@@ -7,25 +7,33 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_ALERT;
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_DEVICE;
+
 @Schema(title = "警報紀錄VO")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class AlertRecordVO {
+public class AlertRecordVO extends BaseColumns {
 
     @Schema(title = "實驗室Id")
+    @Field(targetType = FieldType.OBJECT_ID)
     private String laboratoryId;
 
     @Schema(title = "警報Id")
+    @Field(targetType = FieldType.OBJECT_ID)
     private String alertId;
 
     @Schema(title = "警報名稱")
     private String name;
 
     @Schema(title = "目標裝置Id")
+    @Field(targetType = FieldType.OBJECT_ID)
     private String deviceId;
 
     @Schema(title = "目標裝置名稱")
@@ -57,6 +65,15 @@ public class AlertRecordVO {
         return vo;
     }
 
+    public AlertRecord toAlertRecord(AlertRecord data){
+        data.setState(state);
+        data.setNote(note);
+
+        updateBaseColumns(this, data);
+
+        return data;
+    }
+
     @JsonIgnore
     public static List<AggregationOperation> getLookupAggregation() {
         List<AggregationOperation> aggregationList = new ArrayList<>();
@@ -71,9 +88,9 @@ public class AlertRecordVO {
                 .outerJoin(Alert.class)
                 .on(AlertRecord::getAlertId, Alert::getId)
                 .mappingTo(AlertRecordVO.class)
+                .as(LOOKUP_COLLECTION_ALERT)
                 .asArrayField()
                 .mapping(Alert::getName, AlertRecordVO::getName)
-                .mapping(Alert::getDeviceId, AlertRecordVO::getDeviceId)
                 .mapping(Alert::getCheckField, AlertRecordVO::getCheckField)
                 .build();
     }
@@ -83,6 +100,7 @@ public class AlertRecordVO {
                 .outerJoin(Device.class)
                 .on(AlertRecord::getDeviceId, Device::getId)
                 .mappingTo(AlertRecordVO.class)
+                .as(LOOKUP_COLLECTION_DEVICE)
                 .asArrayField()
                 .mapping(Device::getName, AlertRecordVO::getDevice)
                 .build();

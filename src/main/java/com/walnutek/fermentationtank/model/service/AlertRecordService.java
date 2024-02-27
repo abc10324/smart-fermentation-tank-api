@@ -5,10 +5,7 @@ import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
 import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
 import com.walnutek.fermentationtank.model.dao.DeviceDao;
-import com.walnutek.fermentationtank.model.entity.Alert;
-import com.walnutek.fermentationtank.model.entity.AlertRecord;
-import com.walnutek.fermentationtank.model.entity.BaseColumns;
-import com.walnutek.fermentationtank.model.entity.Device;
+import com.walnutek.fermentationtank.model.entity.*;
 import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
 import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.Page;
@@ -16,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +39,24 @@ public class AlertRecordService extends BaseService {
     @Autowired
     private DeviceDao deviceDao;
 
+    public String createAlertRecord(AlertRecordVO vo) {
+        var user = getLoginUser();
+        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
+        var data = vo.toAlertRecord(new AlertRecord());
+        data.setLaboratoryId(vo.getLaboratoryId());
+        data.setAlertId(vo.getAlertId());
+        data.setDeviceId(vo.getDeviceId());
+        data.setTriggerValue(vo.getTriggerValue());
+        alertRecordDao.insert(data);
+
+        return data.getId();
+    }
+
     public void updateAlertRecord(String laboratoryId, String alertRecordId, AlertRecordVO vo) {
         var data = isAlertRecordAvailableEdit(laboratoryId, alertRecordId);
-        data.setNote(vo.getNote());
-        data.setState(vo.getState());
-        alertRecordDao.updateById(data);
+        data.setUpdateTime(LocalDateTime.now());
+        data.setUpdateUser(getLoginUserId());
+        alertRecordDao.updateById(vo.toAlertRecord(data));
     }
 
     public Page<AlertRecordVO> search(String laboratoryId, Map<String, Object> paramMap) {
@@ -85,6 +96,7 @@ public class AlertRecordService extends BaseService {
         var deviceList = deviceDao.selectList(deviceQuery);
         var deviceMap = deviceList.stream().collect(Collectors.toMap(Device::getId, Device::getName));
         var resulList = new ArrayList<DashboardDataVO>();
+
         for (String laboratoryId : map.keySet()) {
             if(userLabMap.containsKey(laboratoryId)){
                 var vo = new DashboardDataVO();
@@ -94,9 +106,11 @@ public class AlertRecordService extends BaseService {
                 var dataList = new ArrayList<AlertRecordVO>();
                 map.get(laboratoryId).forEach( alert -> {
                     var alertRecord = alertRecordMap.get(alert.getId());
-                    var device = deviceMap.get(alert.getDeviceId());
-                    var alertRecordVO = AlertRecordVO.of(alertRecord, alert, device, laboratoryName);
-                    dataList.add(alertRecordVO);
+                    if(Objects.nonNull(alertRecord)){
+                        var device = deviceMap.get(alert.getDeviceId());
+                        var alertRecordVO = AlertRecordVO.of(alertRecord, alert, device, laboratoryName);
+                        dataList.add(alertRecordVO);
+                    }
                 });
                 vo.total = dataList.size();
                 vo.data = dataList;

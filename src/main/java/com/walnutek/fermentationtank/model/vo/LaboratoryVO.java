@@ -52,7 +52,7 @@ public class LaboratoryVO extends BaseColumns {
         data.setName(name);
         data.setNote(note);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }

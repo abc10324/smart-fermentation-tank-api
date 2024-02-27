@@ -85,7 +85,7 @@ public class UserVO extends BaseColumns {
         data.setEmail(email);
         data.setLabList(labList);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }

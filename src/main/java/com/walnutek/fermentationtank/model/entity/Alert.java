@@ -2,7 +2,6 @@ package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -76,13 +75,13 @@ public class Alert extends BaseColumns {
 
     public AlertRecord toAlertRecord(Double triggerValue){
         var data = new AlertRecord();
-        data.setLaboratoryId(this.getLaboratoryId());
+        data.setLaboratoryId(laboratoryId);
         data.setAlertId(this.getId());
-        data.setDeviceId(this.getDeviceId());
+        data.setDeviceId(deviceId);
         data.setTriggerValue(triggerValue);
         data.setState(AlertRecord.AlertState.ISSUE);
 
-        syncBaseColumns(this, data);
+        updateBaseColumns(this, data);
 
         return data;
     }

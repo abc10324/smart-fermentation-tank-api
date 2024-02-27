@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_ALERT;
 import static com.walnutek.fermentationtank.config.Const.LOOKUP_COLLECTION_DEVICE;
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 import static com.walnutek.fermentationtank.model.service.Utils.hasText;

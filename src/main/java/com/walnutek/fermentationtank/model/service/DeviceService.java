@@ -61,6 +61,8 @@ public class DeviceService extends BaseService {
     public void updateDevice(String laboratoryId, String deviceId, DeviceVO vo) {
         checkCreateOrUpdateField(vo);
         var data = isDeviceAvailableEdit(laboratoryId, deviceId);
+        data.setUpdateTime(LocalDateTime.now());
+        data.setUpdateUser(getLoginUserId());
         deviceDao.updateById(vo.toDevice(data));
     }
 

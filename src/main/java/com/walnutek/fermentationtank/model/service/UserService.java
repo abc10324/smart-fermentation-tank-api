@@ -63,9 +63,12 @@ public class UserService extends BaseService {
     public void updateUser(String userId, UserVO vo) {
         var data = isUserAvailableEdit(userId);
         checkCreateOrUpdateField(vo, false, data);
-        vo.toUser(data);
-        data.setPassword(encryptPassword(vo.getPassword()));
-        userDao.updateById(data);
+        var password = encryptPassword(vo.getPassword());
+        var user = vo.toUser(data);
+        user.setPassword(password);
+        user.setUpdateTime(LocalDateTime.now());
+        user.setUpdateUser(getLoginUserId());
+        userDao.updateById(user);
     }
 
     public void updateUserStatus(String userId, User.Status isActive) {
