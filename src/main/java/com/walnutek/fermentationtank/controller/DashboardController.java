@@ -90,7 +90,7 @@ public class DashboardController {
                 where(Device::getStatus).is(BaseColumns.Status.ACTIVE).build()
         );
         var deviceLabMap = new HashMap<String,String>();
-        deviceService.listByQuery(query).stream().map(device -> deviceLabMap.put(device.getId(), device.getName()));
+        deviceService.listByQuery(query).forEach(device -> deviceLabMap.put(device.getId(), device.getName()));
         return deviceLabMap;
     }
 

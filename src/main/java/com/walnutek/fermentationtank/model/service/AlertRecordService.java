@@ -86,7 +86,8 @@ public class AlertRecordService extends BaseService {
                 .filter(Objects::nonNull)
                 .toList();
         var alertRecordList = alertRecordDao.selectList(alertRecordQuery);
-        var alertRecordMap = alertRecordList.stream().collect(Collectors.toMap(AlertRecord::getAlertId, Function.identity()));
+        var alertRecordMap = alertRecordList.stream().collect(Collectors.groupingBy(AlertRecord::getAlertId));
+
         var deviceQuery = Stream.of(
                         where(Device::getId).in(deviceIdList),
                         where(Alert::getStatus).is(BaseColumns.Status.ACTIVE)
@@ -105,11 +106,13 @@ public class AlertRecordService extends BaseService {
                 vo.laboratoryId = laboratoryId;
                 var dataList = new ArrayList<AlertRecordVO>();
                 map.get(laboratoryId).forEach( alert -> {
-                    var alertRecord = alertRecordMap.get(alert.getId());
-                    if(Objects.nonNull(alertRecord)){
+                    var targetAlertRecordList = alertRecordMap.get(alert.getId());
+                    if(!targetAlertRecordList.isEmpty()){
                         var device = deviceMap.get(alert.getDeviceId());
-                        var alertRecordVO = AlertRecordVO.of(alertRecord, alert, device, laboratoryName);
-                        dataList.add(alertRecordVO);
+                        targetAlertRecordList.forEach( record ->{
+                            var alertRecordVO = AlertRecordVO.of(record, alert, device, laboratoryName);
+                            dataList.add(alertRecordVO);
+                        });
                     }
                 });
                 vo.total = dataList.size();
