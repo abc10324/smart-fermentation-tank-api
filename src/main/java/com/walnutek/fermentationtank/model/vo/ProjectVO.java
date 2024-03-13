@@ -1,5 +1,6 @@
 package com.walnutek.fermentationtank.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.walnutek.fermentationtank.config.mongo.AggregationLookupBuilder;
 import com.walnutek.fermentationtank.model.entity.*;
@@ -35,9 +36,11 @@ public class ProjectVO extends BaseColumns {
     private String device;
 
     @Schema(title = "起始時間")
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm")
     private LocalDateTime startTime;
 
     @Schema(title = "結束時間")
+    @JsonFormat(pattern = "yyyy/MM/dd HH:mm")
     private LocalDateTime endTime;
 
     public static ProjectVO of(Project data, String labName, String device) {

@@ -8,8 +8,6 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
-import static com.walnutek.fermentationtank.model.entity.BaseColumns.syncBaseColumns;
-
 @Schema(title = "LineNotifyVO")
 @Data
 @EqualsAndHashCode(callSuper = false)
