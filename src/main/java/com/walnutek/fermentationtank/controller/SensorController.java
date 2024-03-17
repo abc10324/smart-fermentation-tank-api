@@ -4,8 +4,8 @@ import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.Sensor;
 import com.walnutek.fermentationtank.model.entity.SensorRecord;
-import com.walnutek.fermentationtank.model.service.AlertRecordService;
 import com.walnutek.fermentationtank.model.service.AlertService;
+import com.walnutek.fermentationtank.model.service.ProjectService;
 import com.walnutek.fermentationtank.model.service.SensorRecordService;
 import com.walnutek.fermentationtank.model.service.SensorService;
 import com.walnutek.fermentationtank.model.vo.Response;
@@ -36,9 +36,9 @@ public class SensorController {
     private AlertService alertService;
 
     @Autowired
-    private AlertRecordService alertRecordService;
+    private ProjectService projectService;
 
-    @Operation(summary = "取得所有Sensor紀錄清單")
+    @Operation(summary = "依裝置取得所有Sensor紀錄清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
     @GetMapping("/{laboratoryId}/{deviceId}/list")
     public List<SensorRecord> getSensorRecordListByDeviceId(
@@ -46,8 +46,28 @@ public class SensorController {
             @Parameter(name = "deviceId", description = "裝置ID") @PathVariable String deviceId
     ){
         var sensorList = getSensorListByLaboratoryIdAndDeviceId(laboratoryId, deviceId);
+        var sensorRecordParamMap = new HashMap<String, Object>();
         var sensorIdList = sensorList.stream().map(BaseColumns::getId).toList();
-        return getSensorRecordListBySensorIdList(sensorIdList);
+        sensorRecordParamMap.put("sensorIdList", sensorIdList);
+        return sensorRecordService.findListByQuery(sensorRecordParamMap);
+    }
+
+    @Operation(summary = "依專案取得時間區段所有Sensor紀錄清單")
+    @SecurityRequirement(name = Const.BEARER_JWT)
+    @GetMapping("/{laboratoryId}/{deviceId}/{projectId}/list")
+    public List<SensorRecord> getSensorRecordListByProjectId(
+            @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
+            @Parameter(name = "deviceId", description = "裝置ID") @PathVariable String deviceId,
+            @Parameter(name = "projectId", description = "專案ID") @PathVariable String projectId
+    ){
+        var project = projectService.getProjectById(projectId);
+        var sensorList = getSensorListByLaboratoryIdAndDeviceId(laboratoryId, deviceId);
+        var sensorRecordParamMap = new HashMap<String, Object>();
+        var sensorIdList = sensorList.stream().map(BaseColumns::getId).toList();
+        sensorRecordParamMap.put("sensorIdList", sensorIdList);
+        sensorRecordParamMap.put("startTime", project.getStartTime());
+        sensorRecordParamMap.put("endTime", project.getEndTime());
+        return sensorRecordService.findListByQuery(sensorRecordParamMap);
     }
 
     @Operation(summary = "取得目標欄位清單")
@@ -69,13 +89,6 @@ public class SensorController {
         sensorParamMap.put("deviceId", deviceId);
         var sensorList = sensorService.findListByQuery(sensorParamMap);
         return sensorList;
-    }
-
-    private List<SensorRecord> getSensorRecordListBySensorIdList(List<String> sensorIdList) {
-        var sensorRecordParamMap = new HashMap<String, Object>();
-        sensorRecordParamMap.put("sensorIdList", sensorIdList);
-        var sensorRecordList = sensorRecordService.findListByQuery(sensorRecordParamMap);
-        return sensorRecordList;
     }
 
     @Operation(summary = "新增Sensor")

@@ -52,6 +52,11 @@ public class ProjectService extends BaseService {
         projectDao.updateById(data);
     }
 
+    public Project getProjectById(String id){
+        return Optional.ofNullable( projectDao.selectById(id))
+                .orElseThrow(() -> new AppException(AppException.Code.E004));
+    }
+
     public Page<ProjectVO> search(String laboratoryId, Map<String, Object> paramMap) {
         return projectDao.search(laboratoryId,  paramMap);
     }
