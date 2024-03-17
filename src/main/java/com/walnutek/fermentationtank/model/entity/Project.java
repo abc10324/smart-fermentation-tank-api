@@ -2,6 +2,7 @@ package com.walnutek.fermentationtank.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.model.vo.ProjectVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -54,4 +55,11 @@ public class Project extends BaseColumns {
      */
     private Status status = Status.ACTIVE;
 
+    public Project apply(ProjectVO data){
+        this.setDeviceId(data.getDeviceId());
+        this.setName(data.getName());
+        this.setStartTime(data.getStartTime());
+        this.setEndTime(data.getEndTime());
+        return this;
+    }
 }

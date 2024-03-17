@@ -45,7 +45,7 @@ public class DeviceService extends BaseService {
         var user = getLoginUser();
         checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
-        var data = vo.toDevice(new Device());
+        var data = new Device().apply(vo);
         data.setStatus(Status.ACTIVE);
         deviceDao.insert(data);
 
@@ -60,10 +60,10 @@ public class DeviceService extends BaseService {
 
     public void updateDevice(String laboratoryId, String deviceId, DeviceVO vo) {
         checkCreateOrUpdateField(vo);
-        var data = isDeviceAvailableEdit(laboratoryId, deviceId);
+        var data = isDeviceAvailableEdit(laboratoryId, deviceId).apply(vo);
         data.setUpdateTime(LocalDateTime.now());
         data.setUpdateUser(getLoginUserId());
-        deviceDao.updateById(vo.toDevice(data));
+        deviceDao.updateById(data);
     }
 
     public ConnectionStatus checkDeviceConnectionStatus(String laboratoryId, String deviceId){

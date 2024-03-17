@@ -34,7 +34,7 @@ public class UserService extends BaseService {
     public String createUser(UserVO vo) {
         var user = getLoginUser();
         var userId = user.getId();
-        var data = vo.toUser(new User());
+        var data = new User().apply(vo);
         Role targetRole;
         switch (user.getRole()) {
             case SUPER_ADMIN -> {
@@ -63,8 +63,8 @@ public class UserService extends BaseService {
     public void updateUser(String userId, UserVO vo) {
         var data = isUserAvailableEdit(userId);
         checkCreateOrUpdateField(vo, false, data);
+        var user = data.apply(vo);
         var password = encryptPassword(vo.getPassword());
-        var user = vo.toUser(data);
         user.setPassword(password);
         user.setUpdateTime(LocalDateTime.now());
         user.setUpdateUser(getLoginUserId());

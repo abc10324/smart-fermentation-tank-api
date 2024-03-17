@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.model.vo.DeviceVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,6 +37,13 @@ public class Device extends BaseColumns {
 
 
     private Status status = Status.ACTIVE;
+
+    public Device apply(DeviceVO data){
+        this.setName(data.getName());
+        this.setLaboratoryId(data.getLaboratoryId());
+        this.setType(data.getType());
+        return this;
+    }
 
     @Getter
     public enum DeviceType {

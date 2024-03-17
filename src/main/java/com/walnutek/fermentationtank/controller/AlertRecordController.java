@@ -44,8 +44,10 @@ public class AlertRecordController {
     @Operation(summary = "新增警報")
     @SecurityRequirement(name = Const.BEARER_JWT)
     @PostMapping("/{laboratoryId}")
-    public Response createAlertRecord(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
-                                 @RequestBody AlertRecordVO vo) {
+    public Response createAlertRecord(
+            @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
+            @RequestBody AlertRecordVO vo
+    ) {
         alertRecordService.createAlertRecord(vo);
         return Response.ok();
     }

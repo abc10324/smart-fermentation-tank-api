@@ -62,18 +62,4 @@ public class AlertVO extends BaseColumns {
                 .mapping(Device::getName, AlertVO::getDevice)
                 .build();
     }
-
-    public Alert toAlert(Alert data) {
-        data.setName(name);
-        data.setType(type);
-        data.setDeviceId(deviceId);
-        data.setCheckField(checkField);
-        data.setCondition(condition);
-        data.setThreshold(threshold);
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
 }

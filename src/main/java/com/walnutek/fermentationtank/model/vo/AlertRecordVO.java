@@ -65,15 +65,6 @@ public class AlertRecordVO extends BaseColumns {
         return vo;
     }
 
-    public AlertRecord toAlertRecord(AlertRecord data){
-        data.setState(state);
-        data.setNote(note);
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
     @JsonIgnore
     public static List<AggregationOperation> getLookupAggregation() {
         List<AggregationOperation> aggregationList = new ArrayList<>();

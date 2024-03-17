@@ -48,15 +48,6 @@ public class LaboratoryVO extends BaseColumns {
         return vo;
     }
 
-    public Laboratory toLaboratory(Laboratory data) {
-        data.setName(name);
-        data.setNote(note);
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
     @JsonIgnore
     public static List<AggregationOperation> getLookupAggregation() {
         List<AggregationOperation> aggregationList = new ArrayList<>();

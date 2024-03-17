@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.model.vo.LaboratoryVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -37,5 +38,11 @@ public class Laboratory extends BaseColumns {
      * 實驗室狀態
      */
     private Status status = Status.ACTIVE;
+
+    public Laboratory apply(LaboratoryVO data){
+        this.setName(data.getName());
+        this.setNote(data.getNote());
+       return this;
+    }
 
 }

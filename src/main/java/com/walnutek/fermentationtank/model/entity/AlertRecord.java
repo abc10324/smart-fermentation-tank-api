@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -50,6 +51,27 @@ public class AlertRecord extends BaseColumns {
      * 備註
      */
     private String note;
+
+    public AlertRecord apply(AlertRecordVO data){
+        this.setLaboratoryId(data.getLaboratoryId());
+        this.setAlertId(data.getAlertId());
+        this.setDeviceId(data.getDeviceId());
+        this.setTriggerValue(data.getTriggerValue());
+        this.setState(data.getState());
+        this.setNote(data.getNote());
+
+        return this;
+    }
+
+    public AlertRecord apply(Alert data, Double triggerValue){
+        this.setLaboratoryId(data.getLaboratoryId());
+        this.setAlertId(data.getId());
+        this.setDeviceId(data.getDeviceId());
+        this.setTriggerValue(triggerValue);
+        this.setState(AlertRecord.AlertState.ISSUE);
+
+        return this;
+    }
 
     @Getter
     public enum AlertState {

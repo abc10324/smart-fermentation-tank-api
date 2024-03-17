@@ -30,7 +30,7 @@ public class ProjectService extends BaseService {
         var user = getLoginUser();
         checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
-        var data = vo.toProject(new Project());
+        var data = new Project().apply(vo);
         data.setLaboratoryId(laboratoryId);
         data.setStatus(BaseColumns.Status.ACTIVE);
         projectDao.insert(data);
@@ -45,11 +45,11 @@ public class ProjectService extends BaseService {
     }
 
     public void updateProject(String laboratoryId, String projectId, ProjectVO vo) {
-        var data = isProjectAvailableEdit(laboratoryId, projectId);
         checkCreateOrUpdateField(vo);
+        var data = isProjectAvailableEdit(laboratoryId, projectId).apply(vo);
         data.setUpdateTime(LocalDateTime.now());
         data.setUpdateUser(getLoginUserId());
-        projectDao.updateById(vo.toProject(data));
+        projectDao.updateById(data);
     }
 
     public Page<ProjectVO> search(String laboratoryId, Map<String, Object> paramMap) {

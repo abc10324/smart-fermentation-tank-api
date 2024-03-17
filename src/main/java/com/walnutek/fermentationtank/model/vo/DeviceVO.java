@@ -48,16 +48,6 @@ public class DeviceVO extends BaseColumns {
         return vo;
     }
 
-    public Device toDevice(Device data) {
-        data.setName(name);
-        data.setLaboratoryId(laboratoryId);
-        data.setType(type);
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
     @Getter
     public enum ConnectionStatus {
         NORMAL( "正常"),

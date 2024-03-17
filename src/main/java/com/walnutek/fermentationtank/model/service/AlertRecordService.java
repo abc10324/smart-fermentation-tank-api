@@ -41,11 +41,7 @@ public class AlertRecordService extends BaseService {
     public String createAlertRecord(AlertRecordVO vo) {
         var user = getLoginUser();
         checkUserRole(User.Role.LAB_ADMIN, user.getRole());
-        var data = vo.toAlertRecord(new AlertRecord());
-        data.setLaboratoryId(vo.getLaboratoryId());
-        data.setAlertId(vo.getAlertId());
-        data.setDeviceId(vo.getDeviceId());
-        data.setTriggerValue(vo.getTriggerValue());
+        var data = new AlertRecord().apply(vo);
         alertRecordDao.insert(data);
 
         return data.getId();
@@ -53,9 +49,11 @@ public class AlertRecordService extends BaseService {
 
     public void updateAlertRecord(String laboratoryId, String alertRecordId, AlertRecordVO vo) {
         var data = isAlertRecordAvailableEdit(laboratoryId, alertRecordId);
+        data.setState(vo.getState());
+        data.setNote(vo.getNote());
         data.setUpdateTime(LocalDateTime.now());
         data.setUpdateUser(getLoginUserId());
-        alertRecordDao.updateById(vo.toAlertRecord(data));
+        alertRecordDao.updateById(data);
     }
 
     public Page<AlertRecordVO> search(String laboratoryId, Map<String, Object> paramMap) {

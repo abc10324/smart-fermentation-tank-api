@@ -4,10 +4,7 @@ import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.AlertDao;
 import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
-import com.walnutek.fermentationtank.model.entity.Alert;
-import com.walnutek.fermentationtank.model.entity.BaseColumns;
-import com.walnutek.fermentationtank.model.entity.User;
-import com.walnutek.fermentationtank.model.entity.SensorRecord;
+import com.walnutek.fermentationtank.model.entity.*;
 import com.walnutek.fermentationtank.model.vo.AlertVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +36,7 @@ public class AlertService extends BaseService {
         var user = getLoginUser();
         checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
-        var data = vo.toAlert(new Alert());
+        var data = new Alert().apply(vo);
         data.setLaboratoryId(laboratoryId);
         data.setStatus(BaseColumns.Status.ACTIVE);
         alertDao.insert(data);
@@ -55,10 +52,10 @@ public class AlertService extends BaseService {
 
     public void updateAlert(String laboratoryId, String alertId, AlertVO vo) {
         checkCreateOrUpdateField(vo);
-        var data = isAlertAvailableEdit(laboratoryId, alertId);
+        var data = isAlertAvailableEdit(laboratoryId, alertId).apply(vo);
         data.setUpdateTime(LocalDateTime.now());
         data.setUpdateUser(getLoginUserId());
-        alertDao.updateById(vo.toAlert(data));
+        alertDao.updateById(data);
     }
 
     public Page<AlertVO> search(String laboratoryId, Map<String, Object> paramMap) {
@@ -90,7 +87,7 @@ public class AlertService extends BaseService {
                         };
 
                         if(isIssueAlert){
-                            var alertRecord = alert.toAlertRecord(uploadDataValue);
+                            var alertRecord = new AlertRecord().apply(alert, uploadDataValue);
                             alertRecordDao.insert(alertRecord);
                         }
                     }

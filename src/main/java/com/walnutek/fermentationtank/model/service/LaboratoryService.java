@@ -24,7 +24,7 @@ public class LaboratoryService extends BaseService {
         var user = getLoginUser();
         checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
-        var data = vo.toLaboratory(new Laboratory());
+        var data = new Laboratory().apply(vo);
         data.setOwnerId(user.getId());
         data.setStatus(BaseColumns.Status.ACTIVE);
         laboratoryDao.insert(data);
@@ -40,10 +40,10 @@ public class LaboratoryService extends BaseService {
 
     public void updateLaboratory(String id, LaboratoryVO vo) {
         checkCreateOrUpdateField(vo);
-        var data = isLabAvailableEdit(id);
+        var data = isLabAvailableEdit(id).apply(vo);
         data.setUpdateTime(LocalDateTime.now());
         data.setUpdateUser(getLoginUserId());
-        laboratoryDao.updateById(vo.toLaboratory(data));
+        laboratoryDao.updateById(data);
     }
 
     public Page<LaboratoryVO> search(Map<String, Object> paramMap) {

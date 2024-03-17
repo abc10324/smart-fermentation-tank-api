@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
+import com.walnutek.fermentationtank.model.vo.UserVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -79,6 +80,15 @@ public class User extends BaseColumns {
 	 */
 	@JsonFormat(pattern = "yyyy/MM/dd HH:mm")
 	private LocalDateTime lastLoginTime;
+
+	public User apply(UserVO data){
+		this.setAccount(data.getAccount());
+		this.setPassword(data.getPassword());
+		this.setName(data.getName());
+		this.setEmail(data.getEmail());
+		this.setLabList(data.getLabList());
+		return this;
+	}
 
 	@Getter
 	public enum Role {

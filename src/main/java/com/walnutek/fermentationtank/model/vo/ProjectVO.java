@@ -57,17 +57,6 @@ public class ProjectVO extends BaseColumns {
         return vo;
     }
 
-    public Project toProject(Project data) {
-        data.setDeviceId(deviceId);
-        data.setName(name);
-        data.setStartTime(startTime);
-        data.setEndTime(endTime);
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
     @JsonIgnore
     public static List<AggregationOperation> getLookupAggregation() {
         List<AggregationOperation> aggregationList = new ArrayList<>();

@@ -45,7 +45,7 @@ public class SensorService {
         String sensorId;
         if(Objects.isNull(sensor)){
             // 寫入sensor資料
-            var insertOne = sensorVO.toSensor(new Sensor());
+            var insertOne = new Sensor().apply(sensorVO);
             sensorDao.insert(insertOne);
             sensorId = insertOne.getId();
         }else {
@@ -58,7 +58,7 @@ public class SensorService {
                 var sensorRecord = isSenorRecordExists(recordVO);
                 if(Objects.isNull(sensorRecord)){
                     // 寫入sensorRecord資料
-                    var insertOne = recordVO.toSensorRecord(new SensorRecord());
+                    var insertOne = new SensorRecord().apply(recordVO);
                     sensorRecordDao.insert(insertOne);
                     resulList.add(insertOne);
                 }

@@ -78,18 +78,6 @@ public class UserVO extends BaseColumns {
         return vo;
     }
 
-    public User toUser(User data) {
-        data.setAccount(account);
-        data.setPassword(password);
-        data.setName(name);
-        data.setEmail(email);
-        data.setLabList(labList);
-
-        updateBaseColumns(this, data);
-
-        return data;
-    }
-
     @JsonIgnore
     public static List<AggregationOperation> getLookupAggregation() {
     	List<AggregationOperation> aggregationList = new ArrayList<>();

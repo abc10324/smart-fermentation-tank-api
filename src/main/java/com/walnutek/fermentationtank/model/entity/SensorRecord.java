@@ -1,6 +1,7 @@
 package com.walnutek.fermentationtank.model.entity;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.model.vo.SensorRecordVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -29,4 +30,11 @@ public class SensorRecord extends BaseColumns {
      * 資料
      */
     private org.bson.Document uploadData;
+
+    public SensorRecord apply(SensorRecordVO data){
+        this.setSensorId(data.getSensorId());
+        this.setRecordTime(data.getRecordTime());
+        this.setUploadData(data.getUploadData());
+        return this;
+    }
 }
