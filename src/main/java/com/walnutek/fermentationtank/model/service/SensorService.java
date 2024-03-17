@@ -52,7 +52,7 @@ public class SensorService {
             sensorId = sensor.getId();
         }
         var uploadList = sensorVO.getUploadList();
-        if(!uploadList.isEmpty()){
+        if(uploadList!= null && !uploadList.isEmpty()){
             uploadList.forEach(recordVO ->{
                 recordVO.setSensorId(sensorId);
                 var sensorRecord = isSenorRecordExists(recordVO);

@@ -104,7 +104,7 @@ public class AlertRecordService extends BaseService {
                 var dataList = new ArrayList<AlertRecordVO>();
                 map.get(laboratoryId).forEach( alert -> {
                     var targetAlertRecordList = alertRecordMap.get(alert.getId());
-                    if(!targetAlertRecordList.isEmpty()){
+                    if(targetAlertRecordList!= null && !targetAlertRecordList.isEmpty()){
                         var device = deviceMap.get(alert.getDeviceId());
                         targetAlertRecordList.forEach( record ->{
                             var alertRecordVO = AlertRecordVO.of(record, alert, device, laboratoryName);
