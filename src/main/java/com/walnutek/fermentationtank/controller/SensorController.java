@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -46,10 +47,14 @@ public class SensorController {
             @Parameter(name = "deviceId", description = "裝置ID") @PathVariable String deviceId
     ){
         var sensorList = getSensorListByLaboratoryIdAndDeviceId(laboratoryId, deviceId);
-        var sensorRecordParamMap = new HashMap<String, Object>();
-        var sensorIdList = sensorList.stream().map(BaseColumns::getId).toList();
-        sensorRecordParamMap.put("sensorIdList", sensorIdList);
-        return sensorRecordService.findListByQuery(sensorRecordParamMap);
+        List<SensorRecord> resultList = Collections.emptyList();
+        if (!sensorList.isEmpty()){
+            var sensorRecordParamMap = new HashMap<String, Object>();
+            var sensorIdList = sensorList.stream().map(BaseColumns::getId).toList();
+            sensorRecordParamMap.put("sensorIdList", sensorIdList);
+            resultList = sensorRecordService.findListByQuery(sensorRecordParamMap);
+        }
+        return resultList;
     }
 
     @Operation(summary = "依專案取得時間區段所有Sensor紀錄清單")
@@ -62,12 +67,16 @@ public class SensorController {
     ){
         var project = projectService.getProjectById(projectId);
         var sensorList = getSensorListByLaboratoryIdAndDeviceId(laboratoryId, deviceId);
-        var sensorRecordParamMap = new HashMap<String, Object>();
-        var sensorIdList = sensorList.stream().map(BaseColumns::getId).toList();
-        sensorRecordParamMap.put("sensorIdList", sensorIdList);
-        sensorRecordParamMap.put("startTime", project.getStartTime());
-        sensorRecordParamMap.put("endTime", project.getEndTime());
-        return sensorRecordService.findListByQuery(sensorRecordParamMap);
+        List<SensorRecord> resultList = Collections.emptyList();
+        if (!sensorList.isEmpty()){
+            var sensorRecordParamMap = new HashMap<String, Object>();
+            var sensorIdList = sensorList.stream().map(BaseColumns::getId).toList();
+            sensorRecordParamMap.put("sensorIdList", sensorIdList);
+            sensorRecordParamMap.put("startTime", project.getStartTime());
+            sensorRecordParamMap.put("endTime", project.getEndTime());
+            resultList = sensorRecordService.findListByQuery(sensorRecordParamMap);
+        }
+        return resultList;
     }
 
     @Operation(summary = "取得目標欄位清單")
