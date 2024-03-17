@@ -4,8 +4,10 @@ import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.model.dao.SensorRecordDao;
 import com.walnutek.fermentationtank.model.entity.SensorRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -16,8 +18,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
-import static com.walnutek.fermentationtank.model.service.Utils.hasArray;
-import static com.walnutek.fermentationtank.model.service.Utils.hasText;
+import static com.walnutek.fermentationtank.model.service.Utils.*;
 
 @Service
 @Transactional
@@ -28,7 +29,6 @@ public class SensorRecordService {
 
     public List<SensorRecord> findListByQuery(Map<String, Object> paramMap){
         CriteriaBuilder recordTimeQuery = null ;
-
         if(paramMap.get("startTime") != null && paramMap.get("endTime") != null ){
             if (paramMap.get("startTime") instanceof LocalDateTime startTime
                     && paramMap.get("endTime") instanceof LocalDateTime endTime) {
@@ -37,7 +37,6 @@ public class SensorRecordService {
                 recordTimeQuery = where(SensorRecord::getRecordTime).gte(startTimeLong).lte(endTimeLong);
             }
         }
-
         var sensorRecordQuery = Stream.of(
                         where(hasText(paramMap.get("sensorId")), SensorRecord::getSensorId).is(paramMap.get("sensorId")),
                         where(hasArray(paramMap.get("sensorIdList")), SensorRecord::getSensorId).in(paramMap.get("sensorIdList")),
@@ -45,6 +44,9 @@ public class SensorRecordService {
                 ).map(CriteriaBuilder::build)
                 .filter(Objects::nonNull)
                 .toList();
-        return sensorRecordDao.selectList(sensorRecordQuery);
+        var query = new Query();
+        sensorRecordQuery.forEach(query::addCriteria);
+        query.with(Sort.by(Sort.Direction.DESC, field(SensorRecord::getRecordTime)));
+        return sensorRecordDao.selectList(query);
     }
 }
