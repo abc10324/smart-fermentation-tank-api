@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -35,18 +36,23 @@ public class LineNotifyController {
     @Autowired
     private LaboratoryService laboratoryService;
 
-    public static final String LINE_AUTHORIZE_API = "https://notify-bot.line.me/oauth/authorize";
+    @Value("${app.line-notify.authorize-api}")
+    public String LINE_AUTHORIZE_API;
     public static final String LINE_NOTIFY_API = "/api/line-notify";
     public static final String QUERY_QUESTION = "?";
     public static final String QUERY_AND = "&";
     public static final String QUERY_UNDER_SCORE = "_";
     public static final String QUERY_RESPONSE_TYPE = "response_type=code";
-    public static final String QUERY_CLIENT_ID = "client_id=nrtjO7b6ju5Y72Gr29aJsc";
+    public static final String QUERY_CLIENT_ID = "client_id=";
+    @Value("${app.line-notify.client-id}")
+    public String CLIENT_ID;
     public static final String QUERY_REDIRECT_URI = "redirect_uri=";
     public static final String QUERY_ID = "id=";
     public static final String QUERY_SCOPE = "scope=notify";
-    public static final String QUERY_STATE = "state=iGP8fIcXNUSjoqqLVEHmfhW9QcVmaTirwjrt9CbV3RJ";
-    public static final String CrossOrigin = "http://a515-60-248-32-193.ngrok-free.app";
+    public static final String QUERY_STATE = "state=";
+    @Value("${app.line-notify.state}")
+    public String STATE ;
+//    public static final String CrossOrigin = "http://a515-60-248-32-193.ngrok-free.app";
 
     @Operation(summary = "取得 LineNotify連動 Url")
     @GetMapping("/connection")
@@ -59,14 +65,13 @@ public class LineNotifyController {
         var userId = userService.getLoginUserInfo().getUserId();
         var id = laboratoryId + QUERY_UNDER_SCORE + userId;
         var baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-//        var baseUrl = CrossOrigin;
         var redirectUri = baseUrl + LINE_NOTIFY_API + QUERY_QUESTION + QUERY_ID + id;
         return LINE_AUTHORIZE_API + QUERY_QUESTION
                 + QUERY_RESPONSE_TYPE
-                + QUERY_AND + QUERY_CLIENT_ID
+                + QUERY_AND + QUERY_CLIENT_ID + CLIENT_ID
                 + QUERY_AND + QUERY_REDIRECT_URI + redirectUri
                 + QUERY_AND + QUERY_SCOPE
-                + QUERY_AND + QUERY_STATE;
+                + QUERY_AND + QUERY_STATE + STATE;
     }
 
     @Operation(summary = "新增LineNotify綁定")

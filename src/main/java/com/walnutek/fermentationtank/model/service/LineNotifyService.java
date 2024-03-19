@@ -8,6 +8,7 @@ import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.LineNotifyVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,15 +34,21 @@ public class LineNotifyService extends BaseService {
     @Autowired
     private DeviceDao deviceDao;
     public static final String LOCAL_LINE_NOTIFY_API = "/api/line-notify";
-    public static final String LINE_TOKEN_API = "https://notify-bot.line.me/oauth/token";
-    public static final String LINE_NOTIFY_API = "https://notify-api.line.me/api/notify";
+    @Value("${app.line-notify.token-api}")
+    public String LINE_TOKEN_API;
+    @Value("${app.line-notify.notify-api}")
+    public String LINE_NOTIFY_API;
     public static final String QUERY_QUESTION = "?";
     public static final String QUERY_AND = "&";
     public static final String QUERY_UNDER_SCORE = "_";
     public static final String QUERY_ID = "id=";
     public static final String QUERY_GRANT_TYPE = "grant_type=authorization_code";
-    public static final String QUERY_CLIENT_ID = "client_id=nrtjO7b6ju5Y72Gr29aJsc";
-    public static final String QUERY_CLIENT_SECRET = "client_secret=iGP8fIcXNUSjoqqLVEHmfhW9QcVmaTirwjrt9CbV3RJ";
+    public static final String QUERY_CLIENT_ID = "client_id=";
+    @Value("${app.line-notify.client-id}")
+    public String CLIENT_ID;
+    public static final String QUERY_CLIENT_SECRET = "client_secret=";
+    @Value("${app.line-notify.client-secret}")
+    public String CLIENT_SECRET;
     public static final String QUERY_CODE = "code=";
     public static final String QUERY_REDIRECT_URI = "redirect_uri=";
 
@@ -85,8 +92,8 @@ public class LineNotifyService extends BaseService {
         RestClient restClient = RestClient.create();
         var uri = LINE_TOKEN_API + QUERY_QUESTION
                 + QUERY_GRANT_TYPE
-                + QUERY_AND + QUERY_CLIENT_ID
-                + QUERY_AND + QUERY_CLIENT_SECRET
+                + QUERY_AND + QUERY_CLIENT_ID + CLIENT_ID
+                + QUERY_AND + QUERY_CLIENT_SECRET + CLIENT_SECRET
                 + QUERY_AND + QUERY_CODE + code
                 + QUERY_AND + QUERY_REDIRECT_URI + redirectUri;
         LineAccessToken response = restClient.post()
