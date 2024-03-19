@@ -23,13 +23,17 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
+        var isCreateLineNotify =
+                "/api/line-notify".equals(request.getRequestURI())
+                        && HttpMethod.GET.name().equals(request.getMethod());
+
+        if (HttpMethod.OPTIONS.name().equals(request.getMethod())|| isCreateLineNotify) {
             return true;
         }
         String token = Optional.ofNullable(request.getHeader("Authorization"))
     						   .orElse("")
     						   .replaceAll("Bearer ", "");
-        
+
         if (!StringUtils.hasText(token)) {
             throw new AppException(Code.E001, "使用者未登入");
         } else if (jwtService.isTokenExpire(token)) {
@@ -44,5 +48,5 @@ public class AuthInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) {
         Auth.removeAuthUser();
     }
-    
+
 }

@@ -92,8 +92,11 @@ public class BaseColumns {
 
 	@Getter
 	public enum Status {
+		ACTIVE("啟用"),
+
 		DELETED( "刪除"),
-		ACTIVE("啟用");
+
+		PENDING("尚未啟用");
 
 		private String name;
 

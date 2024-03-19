@@ -32,6 +32,9 @@ public class AlertService extends BaseService {
     @Autowired
     private AlertRecordDao alertRecordDao;
 
+    @Autowired
+    private LineNotifyService lineNotifyService;
+
     public String createAlert(String laboratoryId, AlertVO vo){
         var user = getLoginUser();
         checkUserRole(User.Role.LAB_ADMIN, user.getRole());
@@ -73,7 +76,7 @@ public class AlertService extends BaseService {
         return alertDao.selectList(alertQuery);
     }
 
-    public void checkSensorUploadDataAndSendAlertRecord(Map<String, Object> paramMap, SensorRecord record ) {
+    public void checkSensorUploadDataAndSendAlertRecord(Map<String, Object> paramMap, SensorRecord record){
         var alertList = findListByQuery(paramMap);
         var uploadData = record.getUploadData();
         if(Objects.nonNull(uploadData)){
@@ -89,6 +92,8 @@ public class AlertService extends BaseService {
                         if(isIssueAlert){
                             var alertRecord = new AlertRecord().apply(alert, uploadDataValue);
                             alertRecordDao.insert(alertRecord);
+
+                            lineNotifyService.sendLineNotify(alert.getLaboratoryId(), alert, alertRecord);
                         }
                     }
                 }

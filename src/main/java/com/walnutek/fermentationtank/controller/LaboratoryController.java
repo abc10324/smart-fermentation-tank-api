@@ -63,5 +63,4 @@ public class LaboratoryController {
         laboratoryService.deleteLaboratory(laboratoryId);
         return Response.ok();
     }
-
 }

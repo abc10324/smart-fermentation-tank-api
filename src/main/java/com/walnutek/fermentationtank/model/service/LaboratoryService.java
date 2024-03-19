@@ -46,7 +46,7 @@ public class LaboratoryService extends BaseService {
         laboratoryDao.updateById(data);
     }
 
-    public Page<LaboratoryVO> search(Map<String, Object> paramMap) {
+    public Page<LaboratoryVO> search(Map<String, Object> paramMap){
         Page<LaboratoryVO> result = Page.emptyPage();
         var user = getLoginUser();
         var userId = user.getId();
@@ -72,11 +72,14 @@ public class LaboratoryService extends BaseService {
     private Laboratory isLabAvailableEdit(String id) {
         var lab = laboratoryDao.selectByIdAndStatus(id, BaseColumns.Status.ACTIVE);
         checkUserIsLaboratoryOwner(lab.getOwnerId());
-        if(Objects.isNull(lab)){
-            throw new AppException(AppException.Code.E002, "無法更新不存在的實驗室");
-        }else {
-            return lab;
-        }
+        Optional.ofNullable(lab)
+                .orElseThrow(() -> new AppException(AppException.Code.E002, "無法更新不存在的實驗室"));
+        return lab;
+    }
+
+    public Laboratory isLabAvailable(String id) {
+        return Optional.ofNullable(laboratoryDao.selectByIdAndStatus(id, BaseColumns.Status.ACTIVE))
+                .orElseThrow(() -> new AppException(AppException.Code.E002, "無法更新不存在的實驗室"));
     }
 
     private void checkCreateOrUpdateField(LaboratoryVO vo){

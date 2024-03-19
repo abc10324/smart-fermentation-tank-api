@@ -53,7 +53,7 @@ public class ProjectService extends BaseService {
     }
 
     public Project getProjectById(String id){
-        return Optional.ofNullable( projectDao.selectById(id))
+        return Optional.ofNullable(projectDao.selectById(id))
                 .orElseThrow(() -> new AppException(AppException.Code.E004));
     }
 

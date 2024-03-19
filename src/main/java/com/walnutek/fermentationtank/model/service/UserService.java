@@ -111,6 +111,12 @@ public class UserService extends BaseService {
         return UserVO.of(user);
 	}
 
+    public UserVO getUserProfile(String userId) {
+        var user = userDao.userValidCheckAndGetUserInfo(userId);
+        user.setPassword(null);
+        return UserVO.of(user);
+    }
+
     public boolean isAccountExist(String account) {
         return userDao.isAccountExist(account);
 	}

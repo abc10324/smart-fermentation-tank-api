@@ -6,7 +6,6 @@ import com.walnutek.fermentationtank.model.service.AlertRecordService;
 import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.Response;
-import com.walnutek.fermentationtank.model.vo.SensorVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name = "警報紀錄")
@@ -41,7 +39,7 @@ public class AlertRecordController {
         return alertRecordService.search(laboratoryId, paramMap);
     }
 
-    @Operation(summary = "新增警報")
+    @Operation(summary = "新增警報紀錄")
     @SecurityRequirement(name = Const.BEARER_JWT)
     @PostMapping("/{laboratoryId}")
     public Response createAlertRecord(

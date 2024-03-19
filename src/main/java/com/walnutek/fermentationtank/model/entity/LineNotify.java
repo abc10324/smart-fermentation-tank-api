@@ -25,14 +25,31 @@ public class LineNotify extends BaseColumns {
     private String laboratoryId;
 
     /**
-     * LineId
+     * Assigns the generated redirect URI
      */
-    private String lineId;
+    private String redirectUri;
 
     /**
-     * 名稱
+     * A code for acquiring access tokens
      */
-    private String name;
+    private String code;
+
+    /**
+     * Directly sends the assigned state parameter
+     */
+    private String state;
+
+
+    /**
+     * access token
+     */
+    private String accessToken;
+
+    /**
+     * 使用者Id
+     */
+    @Field(targetType = FieldType.OBJECT_ID)
+    private String userId;
 
     /**
      * 狀態
