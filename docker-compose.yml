@@ -26,12 +26,12 @@ services:
       FS_PWD: "${FS_PWD:-1qaz@WSX}"
       LOG_SERVER_SEND_ENABLE: "${LOG_SERVER_SEND_ENABLE:-false}"
       SERVER_NAME: "${SERVER_NAME:-localhost}"
-      LINE_AUTHORIZE_API: "${LINE_AUTHORIZE_API:https://notify-bot.line.me/oauth/authorize}"
-      LINE_TOKEN_API: "${LINE_TOKEN_API:https://notify-bot.line.me/oauth/token}"
-      LINE_NOTIFY_API: "${LINE_NOTIFY_API:https://notify-api.line.me/api/notify}"
-      CLIENT_ID: "${CLIENT_ID:}"
-      CLIENT_SECRET: "${CLIENT_SECRET:}"
-      STATE: "${STATE:f6ee1491fe12e3acb8c65781bf5a7d94}"
+      LINE_AUTHORIZE_API: "${LINE_AUTHORIZE_API:-https://notify-bot.line.me/oauth/authorize}"
+      LINE_TOKEN_API: "${LINE_TOKEN_API:-https://notify-bot.line.me/oauth/token}"
+      LINE_NOTIFY_API: "${LINE_NOTIFY_API:-https://notify-api.line.me/api/notify}"
+      CLIENT_ID: "${CLIENT_ID:-}"
+      CLIENT_SECRET: "${CLIENT_SECRET:-}"
+      STATE: "${STATE:-f6ee1491fe12e3acb8c65781bf5a7d94}"
 
     ports:
       - "${EXPOSE_AP_PORT:-}:8080"
