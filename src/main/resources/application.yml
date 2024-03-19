@@ -33,6 +33,7 @@ server:
       enabled: true
       directory: ${app.name}
       pattern: '%h [%I] "%r" %s %B %{begin:yyyy-MM-dd HH:mm:ss.SSS}t %{end:yyyy-MM-dd HH:mm:ss.SSS}t %D %F "%{Referer}i" "%{User-Agent}i"'
+  forward-headers-strategy: framework
 
 springdoc:
   api-docs:

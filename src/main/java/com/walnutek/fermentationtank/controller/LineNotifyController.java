@@ -124,7 +124,13 @@ public class LineNotifyController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "lineNotifyId", description = "Line NotifyId ID") @PathVariable String lineNotifyId,
             @RequestBody LineNotifyVO vo) {
-        lineNotifyService.updateLineNotify(laboratoryId, lineNotifyId, vo);
-        return Response.ok();
+        var laboratory = laboratoryService.isLabAvailable(laboratoryId);
+        var userId = userService.getLoginUserInfo();
+        if(laboratory.getOwnerId().equals(userId)){
+            lineNotifyService.updateLineNotify(laboratoryId, lineNotifyId, vo);
+            return Response.ok();
+        }else {
+            throw new AppException(AppException.Code.E002, "此帳號無權限更新使用者LineNotify狀態");
+        }
     }
 }
