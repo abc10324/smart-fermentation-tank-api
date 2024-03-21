@@ -1,7 +1,5 @@
 package com.walnutek.fermentationtank.config;
 
-import java.util.List;
-
 public class Const {
 
 	public static final Integer DEFAULT_PAGE = 1;

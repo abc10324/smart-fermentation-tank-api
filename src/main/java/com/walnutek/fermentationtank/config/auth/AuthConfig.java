@@ -24,28 +24,29 @@ public class AuthConfig implements WebMvcConfigurer {
 
     @Autowired
     private AuthInterceptor authInterceptor;
-	
+
 	@Value("${app.api-root-path:}")
     private String apiRootPath;
-	
+
 	@Value("${app.dev-mode}")
 	private Boolean isDevMode;
-	
+
 	@Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(corsInterceptor)
                 .addPathPatterns("/**")
                 .order(0);
-        
+
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns(apiRootPath + "/**")
                 .excludePathPatterns(getExcludePatternList())
                 .order(1);
     }
-	
+
 	private List<String> getExcludePatternList(){
 		List<String> excludePathList = new ArrayList<>();
         excludePathList.add("/user/login");
+        excludePathList.add("/api/line-notify");
 
         if(isDevMode) {
         	excludePathList.add("/docs");
@@ -53,17 +54,17 @@ public class AuthConfig implements WebMvcConfigurer {
         	excludePathList.add("/**/docs");
         	excludePathList.add("/**/docs/**");
         }
-        
+
         return excludePathList.stream()
         		.map(path -> apiRootPath + path)
         		.toList();
 	}
-	
+
 	@Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
     	if(StringUtils.hasText(apiRootPath)) {
     		configurer.setPatternParser(new PathPatternParser())
-    				  .addPathPrefix(apiRootPath, HandlerTypePredicate.forAnnotation(RestController.class));    		
+    				  .addPathPrefix(apiRootPath, HandlerTypePredicate.forAnnotation(RestController.class));
     	}
     }
 

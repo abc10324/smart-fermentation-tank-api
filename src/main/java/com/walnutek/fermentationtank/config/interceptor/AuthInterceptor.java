@@ -23,11 +23,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        var isCreateLineNotify =
-                "/api/line-notify".equals(request.getRequestURI())
-                        && HttpMethod.GET.name().equals(request.getMethod());
-
-        if (HttpMethod.OPTIONS.name().equals(request.getMethod())|| isCreateLineNotify) {
+        if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
             return true;
         }
         String token = Optional.ofNullable(request.getHeader("Authorization"))
