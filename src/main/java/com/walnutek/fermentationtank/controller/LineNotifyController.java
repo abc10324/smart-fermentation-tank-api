@@ -1,7 +1,9 @@
 package com.walnutek.fermentationtank.controller;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.config.auth.HasRole;
 import com.walnutek.fermentationtank.exception.AppException;
+import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.LaboratoryService;
 import com.walnutek.fermentationtank.model.service.LineNotifyService;
 import com.walnutek.fermentationtank.model.service.UserService;
@@ -13,11 +15,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -80,11 +84,12 @@ public class LineNotifyController {
     @Parameter(name = "id", schema = @Schema(implementation = String.class), description = "實驗室Id跟使用者Id", example = "65a747eea2df8e3055c98f78_65a74533a2df8e3055c98f77")
     @Parameter(name = "code", schema = @Schema(implementation = String.class), description = "code")
     @Parameter(name = "state", schema = @Schema(implementation = String.class), description = "state")
-    public Response createLineNotify(
+    public void createLineNotify(
+            HttpServletResponse response,
             @Parameter(hidden = true) @RequestParam String id,
             @Parameter(hidden = true) @RequestParam String code,
             @Parameter(hidden = true) @RequestParam String state
-    ){
+    ) throws IOException {
         var idList = Arrays.stream(id.split(QUERY_UNDER_SCORE)).toList();
         if(!idList.isEmpty()){
             var laboratoryId = idList.get(0);
@@ -96,7 +101,7 @@ public class LineNotifyController {
                     .orElseThrow(() -> new AppException(AppException.Code.E004));
             var baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
             lineNotifyService.createLineNotify(laboratoryId, userId, baseUrl, code, state);
-            return Response.ok();
+            response.sendRedirect(baseUrl);
         }else {
             throw new AppException(AppException.Code.E002);
         }
@@ -114,11 +119,13 @@ public class LineNotifyController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(hidden = true) @RequestParam Map<String, Object> paramMap
     ){
+        laboratoryService.checkUserIsBelongToLaboratory(laboratoryId, true);
         return lineNotifyService.search(laboratoryId, paramMap);
     }
 
     @Operation(summary = "更新使用者LineNotify狀態")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @PutMapping("/{laboratoryId}/{lineNotifyId}")
     public Response updateUserLineNotifyStatus(
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
@@ -126,6 +133,7 @@ public class LineNotifyController {
             @RequestBody LineNotifyVO vo) {
         var laboratory = laboratoryService.isLabAvailable(laboratoryId);
         var userId = userService.getLoginUserInfo().getUserId();
+        laboratoryService.checkUserIsLaboratoryOwner(laboratory.getOwnerId(), true);
         if(laboratory.getOwnerId().equals(userId)){
             lineNotifyService.updateLineNotify(laboratoryId, lineNotifyId, vo);
             return Response.ok();

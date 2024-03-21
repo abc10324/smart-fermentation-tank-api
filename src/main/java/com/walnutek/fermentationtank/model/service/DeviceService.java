@@ -5,14 +5,16 @@ import com.walnutek.fermentationtank.model.dao.DeviceDao;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
 import com.walnutek.fermentationtank.model.dao.SensorDao;
 import com.walnutek.fermentationtank.model.dao.SensorRecordDao;
-import com.walnutek.fermentationtank.model.entity.*;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
 import com.walnutek.fermentationtank.model.entity.BaseColumns.Status;
+import com.walnutek.fermentationtank.model.entity.Device;
 import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
+import com.walnutek.fermentationtank.model.entity.Sensor;
+import com.walnutek.fermentationtank.model.entity.SensorRecord;
 import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.DeviceVO;
 import com.walnutek.fermentationtank.model.vo.DeviceVO.ConnectionStatus;
 import com.walnutek.fermentationtank.model.vo.Page;
-import com.walnutek.fermentationtank.model.vo.ProjectVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
@@ -42,8 +44,6 @@ public class DeviceService extends BaseService {
     private SensorRecordDao sensorRecordDao;
 
     public String createDevice(DeviceVO vo) {
-        var user = getLoginUser();
-        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
         var data = new Device().apply(vo);
         data.setStatus(Status.ACTIVE);
@@ -143,7 +143,6 @@ public class DeviceService extends BaseService {
     }
 
     private Device isDeviceAvailableEdit(String laboratoryId, String deviceId) {
-        checkUserIsBelongToLaboratory(laboratoryId);
         var device = deviceDao.selectByIdAndStatus(deviceId, BaseColumns.Status.ACTIVE);
         if(Objects.isNull(device)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的裝置");

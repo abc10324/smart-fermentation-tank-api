@@ -68,13 +68,12 @@ public class LaboratoryService extends BaseService {
         return laboratoryDao.selectList(criteriaList);
     }
 
-
     private Laboratory isLabAvailableEdit(String id) {
-        var lab = laboratoryDao.selectByIdAndStatus(id, BaseColumns.Status.ACTIVE);
-        checkUserIsLaboratoryOwner(lab.getOwnerId());
-        Optional.ofNullable(lab)
+        var laboratory = Optional.ofNullable(laboratoryDao.selectByIdAndStatus(id, BaseColumns.Status.ACTIVE))
                 .orElseThrow(() -> new AppException(AppException.Code.E002, "無法更新不存在的實驗室"));
-        return lab;
+        checkUserIsLaboratoryOwner(laboratory.getOwnerId(), false);
+
+        return laboratory;
     }
 
     public Laboratory isLabAvailable(String id) {

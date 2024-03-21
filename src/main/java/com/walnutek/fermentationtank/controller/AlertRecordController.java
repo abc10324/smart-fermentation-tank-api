@@ -36,6 +36,7 @@ public class AlertRecordController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(hidden = true) @RequestParam Map<String, Object> paramMap
     ){
+        alertRecordService.checkUserIsBelongToLaboratory(laboratoryId, true);
         return alertRecordService.search(laboratoryId, paramMap);
     }
 
@@ -46,6 +47,7 @@ public class AlertRecordController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @RequestBody AlertRecordVO vo
     ) {
+        alertRecordService.checkUserIsBelongToLaboratory(laboratoryId, true);
         alertRecordService.createAlertRecord(vo);
         return Response.ok();
     }
@@ -57,7 +59,8 @@ public class AlertRecordController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "alertRecordId", description = "警報紀錄ID") @PathVariable String alertRecordId,
             @RequestBody AlertRecordVO vo) {
-        alertRecordService.updateAlertRecord(laboratoryId, alertRecordId, vo);
+        alertRecordService.checkUserIsBelongToLaboratory(laboratoryId, true);
+        alertRecordService.updateAlertRecord(alertRecordId, vo);
         return Response.ok();
     }
 }

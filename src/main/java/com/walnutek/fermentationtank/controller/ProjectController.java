@@ -1,6 +1,8 @@
 package com.walnutek.fermentationtank.controller;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.config.auth.HasRole;
+import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.ProjectService;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.ProjectVO;
@@ -33,38 +35,44 @@ public class ProjectController {
     @GetMapping("/{laboratoryId}")
     public Page<ProjectVO> search(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                   @Parameter(hidden = true) @RequestParam Map<String, Object> paramMap){
+        projectService.checkUserIsBelongToLaboratory(laboratoryId, true);
         return projectService.search(laboratoryId, paramMap);
     }
 
     @Operation(summary = "新增專案")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN, User.Role.LAB_USER})
     @PostMapping("/{laboratoryId}")
     public Response createProject(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                  @RequestBody ProjectVO vo) {
+        projectService.checkUserIsLaboratoryOwner(laboratoryId, false);
         projectService.createProject(laboratoryId, vo);
         return Response.ok();
     }
 
     @Operation(summary = "更新專案")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN, User.Role.LAB_USER})
     @PutMapping("/{laboratoryId}/{projectId}")
     public Response updateProject(
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "projectId", description = "專案ID") @PathVariable String projectId,
             @RequestBody ProjectVO vo) {
+        projectService.checkUserIsLaboratoryOwner(laboratoryId, false);
         projectService.updateProject(laboratoryId, projectId, vo);
         return Response.ok();
     }
 
     @Operation(summary = "刪除專案")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN, User.Role.LAB_USER})
     @DeleteMapping("/{laboratoryId}/{projectId}")
     public Response deleteProject(
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "projectId", description = "專案ID") @PathVariable String projectId
     ) {
+        projectService.checkUserIsLaboratoryOwner(laboratoryId, false);
         projectService.deleteProject(laboratoryId, projectId);
         return Response.ok();
     }
-
 }

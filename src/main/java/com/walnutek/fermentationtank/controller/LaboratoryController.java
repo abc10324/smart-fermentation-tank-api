@@ -1,6 +1,8 @@
 package com.walnutek.fermentationtank.controller;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.config.auth.HasRole;
+import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.LaboratoryService;
 import com.walnutek.fermentationtank.model.vo.LaboratoryVO;
 import com.walnutek.fermentationtank.model.vo.Page;
@@ -37,6 +39,7 @@ public class LaboratoryController {
 
     @Operation(summary = "新增實驗室")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN})
     @PostMapping
     public Response createLaboratory(@RequestBody LaboratoryVO vo) {
         laboratoryService.createLaboratory(vo);
@@ -45,6 +48,7 @@ public class LaboratoryController {
 
     @Operation(summary = "更新實驗室")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN})
     @PutMapping("/{laboratoryId}")
     public Response updateLaboratory(
             @Parameter(name = "laboratoryId", description = "實驗室ID")
@@ -56,6 +60,7 @@ public class LaboratoryController {
 
     @Operation(summary = "刪除實驗室")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN})
     @DeleteMapping("/{laboratoryId}")
     public Response deleteLaboratory(
             @Parameter(name = "laboratoryId", description = "實驗室ID")

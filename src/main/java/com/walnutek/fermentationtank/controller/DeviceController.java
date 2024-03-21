@@ -1,7 +1,9 @@
 package com.walnutek.fermentationtank.controller;
 
 import com.walnutek.fermentationtank.config.Const;
+import com.walnutek.fermentationtank.config.auth.HasRole;
 import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
+import com.walnutek.fermentationtank.model.entity.User;
 import com.walnutek.fermentationtank.model.service.DeviceService;
 import com.walnutek.fermentationtank.model.vo.DeviceVO;
 import com.walnutek.fermentationtank.model.vo.Page;
@@ -37,6 +39,7 @@ public class DeviceController {
     public Page<DeviceVO> search(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                  @Parameter(name = "type", description = "裝置類型") @PathVariable DeviceType type,
                                  @Parameter(hidden = true) @RequestParam Map<String, Object> paramMap){
+        deviceService.checkUserIsBelongToLaboratory(laboratoryId, true);
         return deviceService.search(laboratoryId, type, paramMap);
     }
 
@@ -47,6 +50,7 @@ public class DeviceController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "type", description = "裝置類型") @PathVariable DeviceType type
     ){
+        deviceService.checkUserIsBelongToLaboratory(laboratoryId, true);
         return deviceService.list(laboratoryId, type);
     }
 
@@ -59,9 +63,11 @@ public class DeviceController {
 
     @Operation(summary = "新增裝置")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN, User.Role.LAB_USER})
     @PostMapping("/{laboratoryId}")
     public Response createDevice(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                      @RequestBody DeviceVO vo) {
+        deviceService.checkUserIsBelongToLaboratory(laboratoryId, false);
         vo.setLaboratoryId(laboratoryId);
         deviceService.createDevice(vo);
         return Response.ok();
@@ -69,22 +75,26 @@ public class DeviceController {
 
     @Operation(summary = "更新裝置")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN, User.Role.LAB_USER})
     @PutMapping("/{laboratoryId}/{deviceId}")
     public Response updateDevice(
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "deviceId", description = "裝置ID") @PathVariable String deviceId,
             @RequestBody DeviceVO vo) {
+        deviceService.checkUserIsBelongToLaboratory(laboratoryId, false);
         deviceService.updateDevice(laboratoryId, deviceId, vo);
         return Response.ok();
     }
 
     @Operation(summary = "刪除裝置")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.LAB_ADMIN, User.Role.LAB_USER})
     @DeleteMapping("/{laboratoryId}/{deviceId}")
     public Response deleteDevice(
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "deviceId", description = "裝置ID") @PathVariable String deviceId
     ) {
+        deviceService.checkUserIsBelongToLaboratory(laboratoryId, false);
         deviceService.deleteDevice(laboratoryId, deviceId);
         return Response.ok();
     }

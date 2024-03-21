@@ -47,8 +47,8 @@ public class AlertRecordService extends BaseService {
         return data.getId();
     }
 
-    public void updateAlertRecord(String laboratoryId, String alertRecordId, AlertRecordVO vo) {
-        var data = isAlertRecordAvailableEdit(laboratoryId, alertRecordId);
+    public void updateAlertRecord(String alertRecordId, AlertRecordVO vo) {
+        var data = isAlertRecordAvailableEdit(alertRecordId);
         data.setState(vo.getState());
         data.setNote(vo.getNote());
         data.setUpdateTime(LocalDateTime.now());
@@ -120,8 +120,7 @@ public class AlertRecordService extends BaseService {
         return resulList;
     }
 
-    private AlertRecord isAlertRecordAvailableEdit(String laboratoryId, String alertRecordId){
-        checkUserIsBelongToLaboratory(laboratoryId);
+    private AlertRecord isAlertRecordAvailableEdit(String alertRecordId){
         var query = Stream.of(
                         where(AlertRecord::getId).is(alertRecordId),
                         where(AlertRecord::getState).is(AlertRecord.AlertState.ISSUE)

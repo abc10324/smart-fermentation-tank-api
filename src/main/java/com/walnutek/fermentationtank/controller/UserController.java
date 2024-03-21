@@ -31,6 +31,7 @@ public class UserController {
 
     @Operation(summary = "取得使用者清單")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @Parameter(name = Const.KEYWORD, schema = @Schema(implementation = String.class), description = "帳號|使用者名稱")
     @Parameter(name = Const.PAGE, schema = @Schema(implementation = Integer.class), description = "頁數")
     @Parameter(name = Const.LIMIT, schema = @Schema(implementation = Integer.class), description = "每頁幾筆")
@@ -52,6 +53,7 @@ public class UserController {
 
     @Operation(summary = "取得登入使用者基本資訊")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @GetMapping("/info")
     public LoginUserInfo getUserInfo(){
         return LoginUserInfo.of(userService.getLoginUserInfo());
@@ -59,6 +61,7 @@ public class UserController {
 
 	@Operation(summary = "取得登入使用者個人頁面資訊")
 	@SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
 	@GetMapping("/profile")
 	public UserVO getUserProfile(){
 		return userService.getUserProfile();
@@ -66,12 +69,15 @@ public class UserController {
 
 	@Operation(summary = "檢查帳號是否存在")
 	@GetMapping("/exist/{account}")
-	public AccountExistResponse isAccountExist(@Parameter(name = "account", description = "使用者帳號") @PathVariable String account){
+	public AccountExistResponse isAccountExist(
+            @Parameter(name = "account", description = "使用者帳號") @PathVariable String account)
+    {
 		return AccountExistResponse.of(userService.isAccountExist(account));
 	}
 
     @Operation(summary = "新增使用者")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @PostMapping
     public Response createUser(@RequestBody UserVO vo) {
         userService.createUser(vo);
@@ -100,6 +106,7 @@ public class UserController {
 
     @Operation(summary = "更新密碼", description = "更新該登入使用者的密碼")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @PutMapping("/changePassword")
     public Response changePassword(@RequestBody ChangePasswordPayload paylaod) {
         userService.updateUserPassword(paylaod.getOldPassword(), paylaod.getNewPassword());
@@ -108,6 +115,7 @@ public class UserController {
 
     @Operation(summary = "刪除使用者", description = "刪除該使用者")
     @SecurityRequirement(name = Const.BEARER_JWT)
+    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @DeleteMapping("/{userId}")
     public Response deleteUser(@Parameter(name = "userId", description = "使用者ID")
                                @PathVariable String userId){

@@ -59,16 +59,28 @@ public class BaseService {
         return labList;
     }
 
-    protected void checkUserIsBelongToLaboratory(String laboratoryId){
-        var userLabList = getUserLabList();
-        if(!userLabList.contains(laboratoryId)){
+    public void checkUserIsBelongToLaboratory(String laboratoryId, Boolean isSuperAdminCanAccess){
+        var laboratory = Optional.ofNullable(laboratoryDao.selectByIdAndStatus(laboratoryId, BaseColumns.Status.ACTIVE))
+                .orElseThrow(() -> new AppException(AppException.Code.E004));
+        var user = getLoginUser();
+        var userId = user.getId();
+        var labList = user.getLabList();
+        var result = userId.equals(laboratory.getOwnerId()) || labList.contains(laboratoryId);
+        if(isSuperAdminCanAccess && Role.SUPER_ADMIN.equals(user.getRole())){
+            result = true;
+        }
+        if(!result){
             throw new AppException(AppException.Code.E002, "非所屬實驗室人員無法編輯");
         }
     }
 
-    protected void checkUserIsLaboratoryOwner(String ownerId){
-        var userId = getLoginUserId();
-        if(!userId.equals(ownerId)){
+    public void checkUserIsLaboratoryOwner(String ownerId, Boolean isSuperAdminCanAccess){
+        var user = getLoginUser();
+        var result = user.getId().equals(ownerId);
+        if(isSuperAdminCanAccess && Role.SUPER_ADMIN.equals(user.getRole())){
+            result = true;
+        }
+        if(!result){
             throw new AppException(AppException.Code.E002, "非實驗室管理者無法編輯");
         }
     }

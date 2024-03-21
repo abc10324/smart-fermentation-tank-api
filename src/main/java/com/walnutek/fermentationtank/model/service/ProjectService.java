@@ -27,8 +27,6 @@ public class ProjectService extends BaseService {
     private ProjectDao projectDao;
 
     public String createProject(String laboratoryId, ProjectVO vo) {
-        var user = getLoginUser();
-        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
         var data = new Project().apply(vo);
         data.setLaboratoryId(laboratoryId);
@@ -93,7 +91,6 @@ public class ProjectService extends BaseService {
     }
 
     private Project isProjectAvailableEdit(String laboratoryId, String projectId) {
-        checkUserIsBelongToLaboratory(laboratoryId);
         var project = projectDao.selectByIdAndStatus(projectId, BaseColumns.Status.ACTIVE);
         if(Objects.isNull(project)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的專案");

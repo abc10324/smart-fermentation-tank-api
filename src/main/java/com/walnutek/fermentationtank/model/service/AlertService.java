@@ -47,15 +47,15 @@ public class AlertService extends BaseService {
         return data.getId();
     }
 
-    public void deleteAlert(String laboratoryId, String alertId) {
-        var data = isAlertAvailableEdit(laboratoryId, alertId);
+    public void deleteAlert(String alertId) {
+        var data = isAlertAvailableEdit(alertId);
         data.setStatus(BaseColumns.Status.DELETED);
         alertDao.updateById(data);
     }
 
-    public void updateAlert(String laboratoryId, String alertId, AlertVO vo) {
+    public void updateAlert(String alertId, AlertVO vo) {
         checkCreateOrUpdateField(vo);
-        var data = isAlertAvailableEdit(laboratoryId, alertId).apply(vo);
+        var data = isAlertAvailableEdit(alertId).apply(vo);
         data.setUpdateTime(LocalDateTime.now());
         data.setUpdateUser(getLoginUserId());
         alertDao.updateById(data);
@@ -101,8 +101,7 @@ public class AlertService extends BaseService {
         }
     }
 
-    private Alert isAlertAvailableEdit(String laboratoryId, String alertId){
-        checkUserIsBelongToLaboratory(laboratoryId);
+    private Alert isAlertAvailableEdit(String alertId){
         var alert = alertDao.selectByIdAndStatus(alertId, BaseColumns.Status.ACTIVE);
         if(Objects.isNull(alert)){
             throw new AppException(AppException.Code.E002, "無法更新不存在的警報");

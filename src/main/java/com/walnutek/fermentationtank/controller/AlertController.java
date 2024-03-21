@@ -2,7 +2,9 @@ package com.walnutek.fermentationtank.controller;
 
 import com.walnutek.fermentationtank.config.Const;
 import com.walnutek.fermentationtank.model.service.AlertService;
-import com.walnutek.fermentationtank.model.vo.*;
+import com.walnutek.fermentationtank.model.vo.AlertVO;
+import com.walnutek.fermentationtank.model.vo.Page;
+import com.walnutek.fermentationtank.model.vo.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +33,7 @@ public class AlertController {
     @GetMapping("/{laboratoryId}")
     public Page<AlertVO> search(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                 @Parameter(hidden = true) @RequestParam Map<String, Object> paramMap){
+        alertService.checkUserIsBelongToLaboratory(laboratoryId, true);
         return alertService.search(laboratoryId, paramMap);
     }
 
@@ -38,7 +41,8 @@ public class AlertController {
     @SecurityRequirement(name = Const.BEARER_JWT)
     @PostMapping("/{laboratoryId}")
     public Response createAlert(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
-                                    @RequestBody AlertVO vo) {
+                                @RequestBody AlertVO vo) {
+        alertService.checkUserIsBelongToLaboratory(laboratoryId, true);
         alertService.createAlert(laboratoryId, vo);
         return Response.ok();
     }
@@ -50,7 +54,8 @@ public class AlertController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "alertId", description = "警報設定ID") @PathVariable String alertId,
             @RequestBody AlertVO vo) {
-        alertService.updateAlert(laboratoryId, alertId, vo);
+        alertService.checkUserIsBelongToLaboratory(laboratoryId, true);
+        alertService.updateAlert(alertId, vo);
         return Response.ok();
     }
 
@@ -61,8 +66,8 @@ public class AlertController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "alertId", description = "警報設定ID") @PathVariable String alertId
     ) {
-        alertService.deleteAlert(laboratoryId, alertId);
+        alertService.checkUserIsBelongToLaboratory(laboratoryId, true);
+        alertService.deleteAlert(alertId);
         return Response.ok();
     }
 }
-//警報名稱 裝置分類 目標裝置 目標欄位 條件 閥值 操作
