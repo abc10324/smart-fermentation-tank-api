@@ -1,5 +1,6 @@
 package com.walnutek.fermentationtank.model.service;
 
+import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.DeviceDao;
 import com.walnutek.fermentationtank.model.dao.LineNotifyDao;
@@ -18,8 +19,10 @@ import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static com.walnutek.fermentationtank.model.service.Utils.hasText;
 import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
@@ -55,9 +58,13 @@ public class LineNotifyService extends BaseService {
     public String createLineNotify(String laboratoryId, String userId, String baseUrl, String code, String state){
         var redirectUri = baseUrl + LOCAL_LINE_NOTIFY_API + QUERY_QUESTION
                 + QUERY_ID + laboratoryId + QUERY_UNDER_SCORE + userId;
-        var lineNotify = checkBindingIsExists(laboratoryId, userId);
-        var isCreate = lineNotify.getId() == null;
-        if(BaseColumns.Status.DELETED.equals(lineNotify.getStatus()) || isCreate){
+        var paramMap = new HashMap<String,Object>();
+        paramMap.put("laboratoryId", laboratoryId);
+        paramMap.put("userId", userId);
+        var lineNotify = getLineNotify(paramMap);
+        var isCreate = lineNotify == null;
+        if(isCreate){
+            lineNotify = new LineNotify();
             lineNotify.setLaboratoryId(laboratoryId);
             lineNotify.setUserId(userId);
             lineNotify.setRedirectUri(redirectUri);
@@ -66,21 +73,16 @@ public class LineNotifyService extends BaseService {
             var accessToken = getAccessToken(redirectUri, code);
             lineNotify.setAccessToken(accessToken);
             lineNotify.setStatus(BaseColumns.Status.ACTIVE);
-            if(isCreate){
-                lineNotifyDao.insert(lineNotify);
-            }else {
-                lineNotifyDao.updateById(lineNotify);
-            }
+            lineNotifyDao.insert(lineNotify);
         }
         return lineNotify.getId();
     }
 
     public void updateLineNotify(String laboratoryId, String lineNotifyId, LineNotifyVO vo){
-        var lineNotifyQuery = List.of(
-                where(LineNotify::getLaboratoryId).is(laboratoryId).build(),
-                where(LineNotify::getId).is(lineNotifyId).build()
-        );
-        var lineNotify = Optional.ofNullable(lineNotifyDao.selectOne(lineNotifyQuery))
+        var paramMap = new HashMap<String,Object>();
+        paramMap.put("laboratoryId", laboratoryId);
+        paramMap.put("lineNotifyId", lineNotifyId);
+        var lineNotify = Optional.ofNullable(getLineNotify(paramMap))
                 .orElseThrow(() -> new AppException(AppException.Code.E004));
         lineNotify.setStatus(vo.getStatus());
         lineNotify.setUpdateTime(LocalDateTime.now());
@@ -147,7 +149,6 @@ public class LineNotifyService extends BaseService {
 
     public Page<LineNotifyVO> search(String laboratoryId, Map<String, Object> paramMap) {
         paramMap.put("laboratoryId", laboratoryId);
-        System.out.println("search paramMap="+paramMap);
         return lineNotifyDao.search(paramMap);
     }
 
@@ -180,12 +181,15 @@ public class LineNotifyService extends BaseService {
         return resulList;
     }
 
-    private LineNotify checkBindingIsExists(String laboratoryId, String userId){
-        var lineNotifyQuery = List.of(
-                where(LineNotify::getLaboratoryId).is(laboratoryId).build(),
-                where(LineNotify::getUserId).is(userId).build()
-        );
-        return Optional.ofNullable(lineNotifyDao.selectOne(lineNotifyQuery)).orElse(new LineNotify());
+    public LineNotify getLineNotify(Map<String, Object> paramMap){
+        var lineNotifyQuery = Stream.of(
+                        where(hasText(paramMap.get("lineNotifyId")), LineNotify::getId).is(paramMap.get("lineNotifyId")),
+                        where(hasText(paramMap.get("laboratoryId")), LineNotify::getLaboratoryId).is(paramMap.get("laboratoryId")),
+                        where(hasText(paramMap.get("userId")), LineNotify::getUserId).is(paramMap.get("userId"))
+                ).map(CriteriaBuilder::build)
+                .filter(Objects::nonNull)
+                .toList();
+        return lineNotifyDao.selectOne(lineNotifyQuery);
     }
 }
 

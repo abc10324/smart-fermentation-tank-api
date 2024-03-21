@@ -125,7 +125,7 @@ public class LineNotifyController {
             @Parameter(name = "lineNotifyId", description = "Line NotifyId ID") @PathVariable String lineNotifyId,
             @RequestBody LineNotifyVO vo) {
         var laboratory = laboratoryService.isLabAvailable(laboratoryId);
-        var userId = userService.getLoginUserInfo();
+        var userId = userService.getLoginUserInfo().getUserId();
         if(laboratory.getOwnerId().equals(userId)){
             lineNotifyService.updateLineNotify(laboratoryId, lineNotifyId, vo);
             return Response.ok();
