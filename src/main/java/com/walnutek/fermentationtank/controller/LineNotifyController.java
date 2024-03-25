@@ -23,7 +23,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -134,16 +133,7 @@ public class LineNotifyController {
             @RequestBody LineNotifyVO vo) {
         var laboratory = laboratoryService.isLabAvailable(laboratoryId);
         laboratoryService.checkUserIsLaboratoryOwner(laboratory.getOwnerId(), true);
-        var paramMap = new HashMap<String,Object>();
-        paramMap.put("laboratoryId", laboratoryId);
-        paramMap.put("lineNotifyId", lineNotifyId);
-        var lineNotify = Optional.ofNullable(lineNotifyService.getLineNotify(paramMap))
-                .orElseThrow(() -> new AppException(AppException.Code.E004));
-        if(laboratory.getOwnerId().equals(lineNotify.getUserId())){
-            lineNotifyService.updateLineNotify(lineNotify, vo);
-            return Response.ok();
-        }else {
-            throw new AppException(AppException.Code.E002, "此帳號無權限更新使用者LineNotify狀態");
-        }
+        lineNotifyService.updateLineNotify(laboratoryId, lineNotifyId, vo);
+        return Response.ok();
     }
 }

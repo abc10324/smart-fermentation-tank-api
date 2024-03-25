@@ -78,7 +78,12 @@ public class LineNotifyService extends BaseService {
         return lineNotify.getId();
     }
 
-    public void updateLineNotify(LineNotify lineNotify, LineNotifyVO vo){
+    public void updateLineNotify(String laboratoryId, String lineNotifyId, LineNotifyVO vo){
+        var paramMap = new HashMap<String,Object>();
+        paramMap.put("laboratoryId", laboratoryId);
+        paramMap.put("lineNotifyId", lineNotifyId);
+        var lineNotify = Optional.ofNullable(getLineNotify(paramMap))
+                .orElseThrow(() -> new AppException(AppException.Code.E004));
         lineNotify.setStatus(vo.getStatus());
         lineNotify.setUpdateTime(LocalDateTime.now());
         lineNotify.setUpdateUser(getLoginUserId());
