@@ -46,7 +46,7 @@ public class AuthConfig implements WebMvcConfigurer {
 	private List<String> getExcludePatternList(){
 		List<String> excludePathList = new ArrayList<>();
         excludePathList.add("/user/login");
-        excludePathList.add("/api/line-notify");
+        excludePathList.add("/line-notify");
 
         if(isDevMode) {
         	excludePathList.add("/docs");
