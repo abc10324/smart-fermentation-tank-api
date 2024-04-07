@@ -53,7 +53,6 @@ public class UserController {
 
     @Operation(summary = "取得登入使用者基本資訊")
     @SecurityRequirement(name = Const.BEARER_JWT)
-    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @GetMapping("/info")
     public LoginUserInfo getUserInfo(){
         return LoginUserInfo.of(userService.getLoginUserInfo());
@@ -61,7 +60,6 @@ public class UserController {
 
 	@Operation(summary = "取得登入使用者個人頁面資訊")
 	@SecurityRequirement(name = Const.BEARER_JWT)
-    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
 	@GetMapping("/profile")
 	public UserVO getUserProfile(){
 		return userService.getUserProfile();
@@ -106,7 +104,6 @@ public class UserController {
 
     @Operation(summary = "更新密碼", description = "更新該登入使用者的密碼")
     @SecurityRequirement(name = Const.BEARER_JWT)
-    @HasRole({User.Role.SUPER_ADMIN, User.Role.LAB_ADMIN})
     @PutMapping("/changePassword")
     public Response changePassword(@RequestBody ChangePasswordPayload paylaod) {
         userService.updateUserPassword(paylaod.getOldPassword(), paylaod.getNewPassword());
