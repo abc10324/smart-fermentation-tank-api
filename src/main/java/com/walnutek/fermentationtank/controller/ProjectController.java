@@ -45,7 +45,7 @@ public class ProjectController {
     @PostMapping("/{laboratoryId}")
     public Response createProject(@Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
                                  @RequestBody ProjectVO vo) {
-        projectService.checkUserIsLaboratoryOwner(laboratoryId, false);
+        projectService.checkUserIsBelongToLaboratory(laboratoryId, false);
         projectService.createProject(laboratoryId, vo);
         return Response.ok();
     }
@@ -58,7 +58,7 @@ public class ProjectController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "projectId", description = "專案ID") @PathVariable String projectId,
             @RequestBody ProjectVO vo) {
-        projectService.checkUserIsLaboratoryOwner(laboratoryId, false);
+        projectService.checkUserIsBelongToLaboratory(laboratoryId, false);
         projectService.updateProject(laboratoryId, projectId, vo);
         return Response.ok();
     }
@@ -71,7 +71,7 @@ public class ProjectController {
             @Parameter(name = "laboratoryId", description = "實驗室ID") @PathVariable String laboratoryId,
             @Parameter(name = "projectId", description = "專案ID") @PathVariable String projectId
     ) {
-        projectService.checkUserIsLaboratoryOwner(laboratoryId, false);
+        projectService.checkUserIsBelongToLaboratory(laboratoryId, false);
         projectService.deleteProject(laboratoryId, projectId);
         return Response.ok();
     }
