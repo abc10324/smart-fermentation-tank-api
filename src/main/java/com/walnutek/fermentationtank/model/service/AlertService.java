@@ -36,8 +36,6 @@ public class AlertService extends BaseService {
     private LineNotifyService lineNotifyService;
 
     public String createAlert(String laboratoryId, AlertVO vo){
-        var user = getLoginUser();
-        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         checkCreateOrUpdateField(vo);
         var data = new Alert().apply(vo);
         data.setLaboratoryId(laboratoryId);

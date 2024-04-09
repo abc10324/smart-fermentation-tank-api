@@ -1,17 +1,8 @@
 package com.walnutek.fermentationtank.model.service;
 
-import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
-import com.walnutek.fermentationtank.exception.AppException;
-import com.walnutek.fermentationtank.model.dao.AlertDao;
-import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
-import com.walnutek.fermentationtank.model.dao.DeviceDao;
-import com.walnutek.fermentationtank.model.entity.*;
-import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
-import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
-import com.walnutek.fermentationtank.model.vo.Page;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static com.walnutek.fermentationtank.model.service.Utils.hasText;
+import static java.util.stream.Collectors.groupingBy;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,9 +12,22 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
-import static com.walnutek.fermentationtank.model.service.Utils.hasText;
-import static java.util.stream.Collectors.groupingBy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
+import com.walnutek.fermentationtank.exception.AppException;
+import com.walnutek.fermentationtank.model.dao.AlertDao;
+import com.walnutek.fermentationtank.model.dao.AlertRecordDao;
+import com.walnutek.fermentationtank.model.dao.DeviceDao;
+import com.walnutek.fermentationtank.model.entity.Alert;
+import com.walnutek.fermentationtank.model.entity.AlertRecord;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
+import com.walnutek.fermentationtank.model.entity.Device;
+import com.walnutek.fermentationtank.model.vo.AlertRecordVO;
+import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
+import com.walnutek.fermentationtank.model.vo.Page;
 
 @Service
 @Transactional
@@ -39,8 +43,6 @@ public class AlertRecordService extends BaseService {
     private DeviceDao deviceDao;
 
     public String createAlertRecord(AlertRecordVO vo) {
-        var user = getLoginUser();
-        checkUserRole(User.Role.LAB_ADMIN, user.getRole());
         var data = new AlertRecord().apply(vo);
         alertRecordDao.insert(data);
 
