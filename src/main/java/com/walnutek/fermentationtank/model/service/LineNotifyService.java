@@ -1,13 +1,20 @@
 package com.walnutek.fermentationtank.model.service;
 
-import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
-import com.walnutek.fermentationtank.exception.AppException;
-import com.walnutek.fermentationtank.model.dao.DeviceDao;
-import com.walnutek.fermentationtank.model.dao.LineNotifyDao;
-import com.walnutek.fermentationtank.model.entity.*;
-import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
-import com.walnutek.fermentationtank.model.vo.LineNotifyVO;
-import com.walnutek.fermentationtank.model.vo.Page;
+import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static com.walnutek.fermentationtank.model.service.Utils.hasText;
+import static java.util.stream.Collectors.groupingBy;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +24,18 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
-import static com.walnutek.fermentationtank.model.service.Utils.hasText;
-import static java.util.stream.Collectors.groupingBy;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import com.walnutek.fermentationtank.config.mongo.CriteriaBuilder;
+import com.walnutek.fermentationtank.exception.AppException;
+import com.walnutek.fermentationtank.model.dao.DeviceDao;
+import com.walnutek.fermentationtank.model.dao.LineNotifyDao;
+import com.walnutek.fermentationtank.model.entity.Alert;
+import com.walnutek.fermentationtank.model.entity.AlertRecord;
+import com.walnutek.fermentationtank.model.entity.BaseColumns;
+import com.walnutek.fermentationtank.model.entity.LineAccessToken;
+import com.walnutek.fermentationtank.model.entity.LineNotify;
+import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
+import com.walnutek.fermentationtank.model.vo.LineNotifyVO;
+import com.walnutek.fermentationtank.model.vo.Page;
 
 @Service
 @Transactional
@@ -74,6 +84,13 @@ public class LineNotifyService extends BaseService {
             lineNotify.setAccessToken(accessToken);
             lineNotify.setStatus(BaseColumns.Status.ACTIVE);
             lineNotifyDao.insert(lineNotify);
+        } else {
+        	lineNotify.setRedirectUri(redirectUri);
+            lineNotify.setCode(code);
+            lineNotify.setState(state);
+            var accessToken = getAccessToken(redirectUri, code);
+            lineNotify.setAccessToken(accessToken);
+            lineNotifyDao.updateById(lineNotify);
         }
         return lineNotify.getId();
     }
