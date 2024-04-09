@@ -1,5 +1,22 @@
 package com.walnutek.fermentationtank.model.service;
 
+import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.walnutek.fermentationtank.config.auth.AuthUser;
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.exception.AppException.Code;
@@ -11,15 +28,6 @@ import com.walnutek.fermentationtank.model.entity.User.Role;
 import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.Page;
 import com.walnutek.fermentationtank.model.vo.UserVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
 
 @Service
 @Transactional
@@ -155,11 +163,22 @@ public class UserService extends BaseService {
             List<String> userLabList,
             Map<String,String> userLabMap
     ){
+    	var labOwnerMap = laboratoryDao.selectList(List.of(where(Laboratory::getId).in(userLabList).build()))
+							    		.stream()
+							    		.collect(groupingBy(Laboratory::getOwnerId, mapping(Laboratory::getId, toList())));
+    	
         var userQuery = List.of(
-                where(User::getLabList).in(userLabList).build(),
+                where(User::getLabList).in(userLabList)
+                .or(where(User::getId).in(labOwnerMap.keySet())).build(),
                 where(User::getStatus).is(BaseColumns.Status.ACTIVE).build()
         );
         var list = userDao.selectList(userQuery);
+        list.forEach(user -> {
+        	if(labOwnerMap.containsKey(user.getId())) {
+        		user.setLabList(labOwnerMap.get(user.getId()));
+        	}
+        });
+        
         var resulList = new ArrayList<DashboardDataVO>();
         userLabList.forEach(laboratoryId ->{
             var vo = new DashboardDataVO();
