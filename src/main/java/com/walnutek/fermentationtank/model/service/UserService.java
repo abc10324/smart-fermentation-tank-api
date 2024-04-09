@@ -72,8 +72,10 @@ public class UserService extends BaseService {
         var data = isUserAvailableEdit(userId);
         checkCreateOrUpdateField(vo, false, data);
         var user = data.apply(vo);
-        var password = encryptPassword(vo.getPassword());
-        user.setPassword(password);
+        if(vo.getPassword() != null){
+            var password = encryptPassword(vo.getPassword());
+            user.setPassword(password);
+        }
         user.setUpdateTime(LocalDateTime.now());
         user.setUpdateUser(getLoginUserId());
         userDao.updateById(user);
@@ -234,18 +236,41 @@ public class UserService extends BaseService {
         }
     }
 
-    private void checkCreateOrUpdateField(UserVO vo, Boolean isCreate, User data){
-        if(!StringUtils.hasText(vo.getAccount())
-                || !StringUtils.hasText(vo.getPassword())
-                || Objects.isNull(vo.getRole())
-                || !StringUtils.hasText(vo.getName())
-                || !StringUtils.hasText(vo.getEmail())
-                || Objects.isNull(vo.getLabList())
-                || vo.getLabList().isEmpty()
-        ) throw new AppException(AppException.Code.E002, "必填欄位資料不正確");
+    private void checkCreateOrUpdateField(UserVO vo, Boolean isCreate, User originalUser){
+        var checkResult = new ArrayList<String>();
 
-        if(isCreate || !Objects.equals(data.getAccount(), vo.getAccount())){
-            if(isAccountExist(vo.getAccount())) throw new AppException(Code.E002, "欲更改的帳號已存在");
+        // 新增或更新都做的基本檢查 帳號 角色 名字 email
+        if(!StringUtils.hasText(vo.getAccount())) checkResult.add("使用者帳號");
+        if(Objects.isNull(vo.getRole())) checkResult.add("使用者角色");
+        if(!StringUtils.hasText(vo.getName())) checkResult.add("使用者名稱");
+        if(!StringUtils.hasText(vo.getEmail())) checkResult.add("使用者email");
+        // 新增或更新都做 只有一般使用者要檢查
+        if(Role.LAB_USER.equals(vo.getRole())){
+            if(Objects.isNull(vo.getLabList()) || vo.getLabList().isEmpty())
+                checkResult.add("所屬實驗室列表");
+        }
+        // 只有新增 檢查密碼
+        if(isCreate && !StringUtils.hasText(vo.getPassword())) checkResult.add("密碼");
+        // 只有新增或更新使用者帳號要檢查 email 是否重複
+        if(isCreate || !Objects.equals(originalUser.getAccount(), vo.getAccount())){
+            if(isAccountExist(vo.getAccount())) checkResult.add("欲更改的帳號已存在");
+        }
+        if(!checkResult.isEmpty()){
+            StringBuilder errorMsg  = new StringBuilder();
+            errorMsg.append("錯誤訊息：");
+            var lastIndex = checkResult.size()-1;
+            for (int i = 0; i < checkResult.size(); i++) {
+                var field = checkResult.get(i);
+                if ("欲更改的帳號已存在".equals(field)) {
+                    errorMsg.append(field);
+                } else {
+                    errorMsg.append(field).append("欄位資料不正確");
+                }
+                if(i < lastIndex){
+                    errorMsg.append(", ");
+                }
+            }
+            throw new AppException(AppException.Code.E002, errorMsg.toString());
         }
     }
 }
