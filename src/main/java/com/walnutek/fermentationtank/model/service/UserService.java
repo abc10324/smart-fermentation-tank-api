@@ -191,6 +191,7 @@ public class UserService extends BaseService {
             list.forEach(user -> {
                 if(user.getLabList().contains(laboratoryId)){
                     var userVO = new UserVO();
+                    userVO.setId(user.getId());
                     userVO.setRole(user.getRole());
                     userVO.setAccount(user.getAccount());
                     userVO.setName(user.getName());
