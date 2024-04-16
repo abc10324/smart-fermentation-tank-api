@@ -103,6 +103,7 @@ public class SensorService {
     }
 
     private void checkCreateOrUpdateField(SensorVO vo){
+    	System.out.println(vo);
         if(!StringUtils.hasText(vo.getLaboratoryId())
                 || !StringUtils.hasText(vo.getDeviceId())
                 || !StringUtils.hasText(vo.getLabel())

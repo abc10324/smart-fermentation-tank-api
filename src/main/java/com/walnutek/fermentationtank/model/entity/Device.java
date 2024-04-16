@@ -47,9 +47,9 @@ public class Device extends BaseColumns {
 
     @Getter
     public enum DeviceType {
-        ALL( "全部"),
-
-        FERMENTER( "醱酵槽");
+        ALL("全部"),
+        FERMENTER( "醱酵槽"),
+        BSC("生物安全櫃");
         private String name;
 
         DeviceType(String name) {

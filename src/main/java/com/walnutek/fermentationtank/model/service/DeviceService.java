@@ -1,5 +1,22 @@
 package com.walnutek.fermentationtank.model.service;
 
+import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
+import static java.util.stream.Collectors.groupingBy;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.walnutek.fermentationtank.exception.AppException;
 import com.walnutek.fermentationtank.model.dao.DeviceDao;
 import com.walnutek.fermentationtank.model.dao.LaboratoryDao;
@@ -15,17 +32,6 @@ import com.walnutek.fermentationtank.model.vo.DashboardDataVO;
 import com.walnutek.fermentationtank.model.vo.DeviceVO;
 import com.walnutek.fermentationtank.model.vo.DeviceVO.ConnectionStatus;
 import com.walnutek.fermentationtank.model.vo.Page;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static com.walnutek.fermentationtank.config.mongo.CriteriaBuilder.where;
-import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @Transactional
@@ -159,7 +165,7 @@ public class DeviceService extends BaseService {
 
     private List<DeviceType> getDeviceTypeList(DeviceType type){
         switch (type){
-            case FERMENTER -> {
+            case FERMENTER, BSC -> {
                 return List.of(type);
             }
             default -> {

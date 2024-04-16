@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.walnutek.fermentationtank.config.mongo.AggregationLookupBuilder;
 import com.walnutek.fermentationtank.model.entity.*;
+import com.walnutek.fermentationtank.model.entity.Device.DeviceType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,6 +31,9 @@ public class ProjectVO extends BaseColumns {
     @Schema(title = "專案名稱")
     private String name;
 
+    @Schema(title = "目標裝置種類")
+    private DeviceType type;
+    
     @Schema(title = "目標裝置ID")
     private String deviceId;
 
@@ -71,8 +76,8 @@ public class ProjectVO extends BaseColumns {
                 .on(Project::getDeviceId, Device::getId)
                 .mappingTo(ProjectVO.class)
                 .as(LOOKUP_COLLECTION_DEVICE)
-                .asArrayField()
                 .mapping(Device::getName, ProjectVO::getDevice)
+                .mapping(Device::getType, ProjectVO::getType)
                 .build();
     }
 
